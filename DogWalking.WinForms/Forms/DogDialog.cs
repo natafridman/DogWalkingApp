@@ -12,14 +12,14 @@ namespace DogWalking.WinForms.Forms;
 public sealed partial class DogDialog : Form
 {
     private readonly IDogService _svc;
-    private readonly int  _clientId;
+    private readonly int _clientId;
     private readonly int? _dogId;
 
     public DogDialog(IDogService svc, int clientId, int? dogId = null)
     {
-        _svc      = svc;
+        _svc = svc;
         _clientId = clientId;
-        _dogId    = dogId;
+        _dogId = dogId;
 
         InitializeComponent();
         PopulateBreeds();
@@ -47,7 +47,7 @@ public sealed partial class DogDialog : Form
         var dog = await _svc.GetByIdAsync(_dogId!.Value);
         if (dog is null) return;
 
-        txtName.Text       = dog.Name;
+        txtName.Text = dog.Name;
         dtpBirthDate.Value = dog.BirthDate.ToDateTime(TimeOnly.MinValue);
 
         var match = cmbBreed.Items.Cast<string>()
@@ -62,7 +62,7 @@ public sealed partial class DogDialog : Form
         lblError.Visible = false;
         try
         {
-            var breed     = cmbBreed.SelectedItem?.ToString() ?? "Other";
+            var breed = cmbBreed.SelectedItem?.ToString() ?? "Other";
             var birthDate = DateOnly.FromDateTime(dtpBirthDate.Value);
 
             if (_dogId.HasValue)
@@ -75,7 +75,7 @@ public sealed partial class DogDialog : Form
         }
         catch (Exception ex)
         {
-            lblError.Text    = ex.Message;
+            lblError.Text = ex.Message;
             lblError.Visible = true;
         }
     }
