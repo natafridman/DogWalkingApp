@@ -8,7 +8,7 @@ static class Program
 {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
-    const string conn = "Server=localhost;Database=DogWalkingApp;Trusted_Connection=True;";
+    const string conn = "Server=localhost;Database=DogWalkingApp;Trusted_Connection=True;TrustServerCertificate=True";
 
     [STAThread]
     static async Task Main()
@@ -20,6 +20,7 @@ static class Program
 
         // WinForms — Transient so each form is a fresh instance
         services.AddTransient<LoginForm>();
+        services.AddTransient<MainForm>();
 
         ServiceProvider = services.BuildServiceProvider();
 

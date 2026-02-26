@@ -1,11 +1,12 @@
 using DogWalking.Application.DTOs;
 using DogWalking.Application.Interfaces;
 using DogWalking.Application.Services;
+using DogWalking.Application.Validators;
 using DogWalking.Domain.Enums;
 using DogWalking.Domain.Interfaces;
-using DogWalking.Infrastructure;
 using DogWalking.Infrastructure.Data;
 
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,10 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<DogWalkingDbContext>(o => o.UseSqlServer(conn));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IClientService, ClientService>();
+
+        services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
+
         return services;
     }
 

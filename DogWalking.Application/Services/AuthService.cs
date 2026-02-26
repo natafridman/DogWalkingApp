@@ -1,10 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
-
 using DogWalking.Application.DTOs;
 using DogWalking.Application.Interfaces;
 using DogWalking.Domain.Entities;
+using DogWalking.Domain.Enums;
 using DogWalking.Domain.Interfaces;
+using FluentValidation;
 
 namespace DogWalking.Application.Services;
 
@@ -15,13 +16,24 @@ namespace DogWalking.Application.Services;
 public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IValidator<LoginDto> _loginValidator;
+    private readonly IValidator<CreateUserDto> _createUserValidator;
+    private readonly IValidator<RegisterClientUserDto> _registerValidator;
 
-    public AuthService(IUnitOfWork uow) => _uow = uow;
+    public AuthService(IUnitOfWork uow,
+                       IValidator<LoginDto> loginValidator,
+                       IValidator<CreateUserDto> createUserValidator,
+                       IValidator<RegisterClientUserDto> registerValidator)
+    {
+        _uow = uow;
+        _loginValidator = loginValidator;
+        _createUserValidator = createUserValidator;
+        _registerValidator = registerValidator;
+    }
 
     public async Task<AuthResultDto> LoginAsync(LoginDto dto, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
-            return Fail("Username and password are required.");
+        await _loginValidator.ValidateAndThrowAsync(dto, ct);
 
         var user = await _uow.Users.GetByUsernameAsync(dto.Username.ToLowerInvariant(), ct);
 
@@ -36,16 +48,36 @@ public class AuthService : IAuthService
 
     public async Task<bool> CreateUserAsync(CreateUserDto dto, CancellationToken ct = default)
     {
+        await _createUserValidator.ValidateAndThrowAsync(dto, ct);
+
         var existing = await _uow.Users.GetByUsernameAsync(dto.Username.ToLowerInvariant(), ct);
         if (existing is not null) return false;
 
         var user = new User(dto.Username, HashPassword(dto.Password), dto.FullName, dto.Role,
                             dto.Phone, dto.Email);
+        await _uow.Users.AddAsync(user, ct);
+        await _uow.CommitAsync(ct);
+        return true;
+    }
 
+    public async Task<AuthResultDto> RegisterClientUserAsync(RegisterClientUserDto dto, CancellationToken ct = default)
+    {
+        await _registerValidator.ValidateAndThrowAsync(dto, ct);
+
+        var existing = await _uow.Users.GetByUsernameAsync(dto.Username.ToLowerInvariant(), ct);
+        if (existing is not null)
+            return Fail("Username is already taken.");
+
+        var user = new User(dto.Username, HashPassword(dto.Password), dto.FullName, UserRole.Client);
         await _uow.Users.AddAsync(user, ct);
         await _uow.CommitAsync(ct);
 
-        return true;
+        var client = new Client(dto.FullName, dto.PhoneNumber, dto.Email, dto.Subscription,
+                                userId: user.Id, address: dto.Address);
+        await _uow.Clients.AddAsync(client, ct);
+        await _uow.CommitAsync(ct);
+
+        return new AuthResultDto(true, null, user.Id, user.Username, user.FullName, user.Role.ToString());
     }
 
     private static AuthResultDto Fail(string msg) =>

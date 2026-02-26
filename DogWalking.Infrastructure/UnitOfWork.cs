@@ -14,12 +14,14 @@ public class UnitOfWork : IUnitOfWork
     private readonly DogWalkingDbContext _ctx;
 
     public IUserRepository Users { get; }
+    public IClientRepository Clients { get; }
 
 
     public UnitOfWork(DogWalkingDbContext ctx)
     {
         _ctx = ctx;
         Users = new UserRepository(ctx);
+        Clients = new ClientRepository(ctx);
     }
 
     public async Task<int> CommitAsync(CancellationToken ct = default)

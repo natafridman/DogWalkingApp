@@ -11,11 +11,13 @@ namespace DogWalking.Infrastructure.Data;
 public class DogWalkingDbContext : DbContext
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<Client> Clients => Set<Client>();
 
     public DogWalkingDbContext(DbContextOptions<DogWalkingDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new ClientConfiguration());
     }
 }

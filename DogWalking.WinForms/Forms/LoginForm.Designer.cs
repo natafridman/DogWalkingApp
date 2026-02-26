@@ -108,6 +108,7 @@ partial class LoginForm
         btnLogin.TabIndex = 5;
         btnLogin.Text = "Login";
         btnLogin.UseVisualStyleBackColor = false;
+        btnLogin.Click += BtnLogin_Click;
         // 
         // lblErr
         // 
@@ -161,6 +162,7 @@ partial class LoginForm
         btnWalkerType.TabIndex = 10;
         btnWalkerType.Text = "Dog Walker";
         btnWalkerType.UseVisualStyleBackColor = false;
+        btnWalkerType.Click += BtnWalkerType_Click;
         // 
         // btnClientType
         // 
@@ -176,6 +178,7 @@ partial class LoginForm
         btnClientType.TabIndex = 11;
         btnClientType.Text = "Dog Owner";
         btnClientType.UseVisualStyleBackColor = false;
+        btnClientType.Click += BtnClientType_Click;
         // 
         // lblRegName
         // 
@@ -393,6 +396,7 @@ partial class LoginForm
         btnRegister.TabIndex = 22;
         btnRegister.Text = "Create Account";
         btnRegister.UseVisualStyleBackColor = false;
+        btnRegister.Click += BtnRegister_Click;
         // 
         // lblRegStatus
         // 
