@@ -1,6 +1,4 @@
-﻿using DogWalking.Domain.Interfaces;
-
-namespace DogWalking.Application.Interfaces;
+﻿namespace DogWalking.Domain.Interfaces;
 
 public interface IUnitOfWork : IDisposable
 {

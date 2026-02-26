@@ -4,6 +4,7 @@ using System.Text;
 using DogWalking.Application.DTOs;
 using DogWalking.Application.Interfaces;
 using DogWalking.Domain.Entities;
+using DogWalking.Domain.Interfaces;
 
 namespace DogWalking.Application.Services;
 

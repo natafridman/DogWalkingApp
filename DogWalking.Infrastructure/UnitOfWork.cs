@@ -1,0 +1,29 @@
+using DogWalking.Domain.Interfaces;
+using DogWalking.Infrastructure.Data;
+using DogWalking.Infrastructure.Repositories;
+
+namespace DogWalking.Infrastructure;
+
+/// <summary>
+/// Unit of Work Pattern implementation.
+/// All repositories share the same DbContext instance,
+/// ensuring they participate in the same transaction.
+/// </summary>
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly DogWalkingDbContext _ctx;
+
+    public IUserRepository Users { get; }
+
+
+    public UnitOfWork(DogWalkingDbContext ctx)
+    {
+        _ctx = ctx;
+        Users = new UserRepository(ctx);
+    }
+
+    public async Task<int> CommitAsync(CancellationToken ct = default)
+        => await _ctx.SaveChangesAsync(ct);
+
+    public void Dispose() => _ctx.Dispose();
+}
