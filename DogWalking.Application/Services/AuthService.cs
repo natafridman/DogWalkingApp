@@ -33,7 +33,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResultDto> LoginAsync(LoginDto dto, CancellationToken ct = default)
     {
-        await _loginValidator.ValidateAndThrowAsync(dto, ct);
+        var validation = await _loginValidator.ValidateAsync(dto, ct);
+        if (!validation.IsValid)
+            return Fail(validation.Errors.First().ErrorMessage);
 
         var user = await _uow.Users.GetByUsernameAsync(dto.Username.ToLowerInvariant(), ct);
 
