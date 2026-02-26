@@ -16,6 +16,7 @@ static class Program
         ApplicationConfiguration.Initialize();
 
         var services = new ServiceCollection();
+        services.AddLogging();
         services.AddDogWalkingServices(conn);
 
         // WinForms — Transient so each form is a fresh instance

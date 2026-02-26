@@ -3,6 +3,7 @@ using DogWalking.Application.Interfaces;
 using DogWalking.Domain.Enums;
 
 using Microsoft.Extensions.DependencyInjection;
+using System.Data;
 
 namespace DogWalking.WinForms.Forms;
 
@@ -145,6 +146,7 @@ public partial class LoginForm : Form
         main.SetSession(result.UserId!.Value, result.FullName!, result.Role!, () => Show());
         Hide();
         main.FormClosed += (_, _) => { if (!Visible) Close(); };
+        await main.ApplyRoleLayoutAsync();
         main.Show();
     }
 
