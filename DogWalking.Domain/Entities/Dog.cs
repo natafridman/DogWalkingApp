@@ -20,6 +20,10 @@ public class Dog
 
     public Client Client { get; private set; } = null!;
 
+    private readonly List<WalkEvent> _walkEvents = new();
+    public IReadOnlyCollection<WalkEvent> WalkEvents => _walkEvents.AsReadOnly();
+
+
     private Dog() { }
 
     public Dog(int clientId, string name, string breed, DateOnly birthDate)
@@ -62,5 +66,26 @@ public class Dog
         if (birthDate < today.AddYears(-30))
             throw new DomainException("Dog age cannot exceed 30 years.");
         BirthDate = birthDate;
+    }
+
+    /// <summary>
+    /// Business rule: a dog cannot have two overlapping scheduled/in-progress walks.
+    /// </summary>
+    public void ValidateNoConflictingWalk(DateTime proposedDate, int durationMinutes)
+    {
+        var proposedEnd = proposedDate.AddMinutes(durationMinutes);
+
+        bool hasConflict = _walkEvents
+            .Where(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
+                                 or WalkStatus.Accepted or WalkStatus.InProgress)
+            .Any(w =>
+            {
+                var existingEnd = w.WalkDate.AddMinutes(w.DurationMinutes);
+                return proposedDate < existingEnd && proposedEnd > w.WalkDate;
+            });
+
+        if (hasConflict)
+            throw new DomainException(
+                $"'{Name}' already has a walk overlapping that time slot.");
     }
 }

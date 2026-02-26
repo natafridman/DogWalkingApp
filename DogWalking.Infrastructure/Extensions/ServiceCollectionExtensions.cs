@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClientService, ClientService>();
         services.AddScoped<IDogService, DogService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IWalkEventService, WalkEventService>();
 
         services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
 

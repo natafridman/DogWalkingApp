@@ -13,6 +13,7 @@ public class DogWalkingDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Dog> Dogs => Set<Dog>();
+    public DbSet<WalkEvent> WalkEvents => Set<WalkEvent>();
 
     public DogWalkingDbContext(DbContextOptions<DogWalkingDbContext> options) : base(options) { }
 
@@ -21,5 +22,6 @@ public class DogWalkingDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new ClientConfiguration());
         modelBuilder.ApplyConfiguration(new DogConfiguration());
+        modelBuilder.ApplyConfiguration(new WalkEventConfiguration());
     }
 }

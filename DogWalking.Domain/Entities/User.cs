@@ -9,15 +9,16 @@ namespace DogWalking.Domain.Entities;
 /// </summary>
 public class User
 {
-    public int      Id           { get; private set; }
-    public string   Username     { get; private set; } = string.Empty;
-    public string   PasswordHash { get; private set; } = string.Empty;
-    public UserRole Role         { get; private set; }
-    public string   FullName     { get; private set; } = string.Empty;
-    public string?  Phone        { get; private set; }
-    public string?  Email        { get; private set; }
-    public bool     IsActive     { get; private set; }
-    public DateTime CreatedAt    { get; private set; }
+    public int Id { get; private set; }
+    public string Username { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
+    public UserRole Role { get; private set; }
+    public string FullName { get; private set; } = string.Empty;
+    public string? Phone { get; private set; }
+    public string? Email { get; private set; }
+    public bool IsActive { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public ICollection<WalkEvent> AssignedWalks { get; private set; } = new List<WalkEvent>();
 
     // Required by EF Core
     private User() { }
@@ -32,14 +33,14 @@ public class User
         if (string.IsNullOrWhiteSpace(fullName))
             throw new DomainException("Full name cannot be empty.");
 
-        Username     = username.Trim().ToLowerInvariant();
+        Username = username.Trim().ToLowerInvariant();
         PasswordHash = passwordHash;
-        FullName     = fullName.Trim();
-        Role         = role;
-        Phone        = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
-        Email        = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
-        IsActive     = true;
-        CreatedAt    = DateTime.UtcNow;
+        FullName = fullName.Trim();
+        Role = role;
+        Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
+        Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
+        IsActive = true;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public void UpdatePasswordHash(string newHash)
@@ -63,5 +64,5 @@ public class User
     }
 
     public void Deactivate() => IsActive = false;
-    public void Activate()   => IsActive = true;
+    public void Activate() => IsActive = true;
 }

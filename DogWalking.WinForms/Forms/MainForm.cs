@@ -1,4 +1,6 @@
+using DogWalking.Application.DTOs;
 using DogWalking.Application.Interfaces;
+using DogWalking.Domain.Enums;
 using DogWalking.WinForms.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,6 +9,7 @@ namespace DogWalking.WinForms.Forms;
 public partial class MainForm : Form
 {
     private readonly IClientService _clients;
+    private readonly IWalkEventService _walks;
     private readonly IUserService _users;
     private readonly IDogService _dogSvc;
 
@@ -22,12 +25,16 @@ public partial class MainForm : Form
     {
         _scope = scopeFactory.CreateScope();
         var sp = _scope.ServiceProvider;
-
         _clients = sp.GetRequiredService<IClientService>();
+        _walks = sp.GetRequiredService<IWalkEventService>();
         _users = sp.GetRequiredService<IUserService>();
         _dogSvc = sp.GetRequiredService<IDogService>();
 
         InitializeComponent();
+
+        cmbWalkStatus.Items.AddRange(Enum.GetNames<WalkStatus>());
+        if (cmbWalkStatus.Items.Count > 0)
+            cmbWalkStatus.SelectedIndex = 0;
 
         tabs.TabPages.Clear();
     }
@@ -60,7 +67,7 @@ public partial class MainForm : Form
         switch (_userRole)
         {
             case "Admin":
-                ShowTabs(tabClients, tabUsers);
+                ShowTabs(tabClients, tabWalks, tabUsers);
                 await LoadClientsAsync();
                 break;
         }
@@ -72,7 +79,7 @@ public partial class MainForm : Form
         tabs.TabPages.AddRange(pages);
     }
 
-    // ── Event Handlers ────────────────
+    // ── Event Handlers (wired in Designer) ────────────────
 
     private void BtnLogout_Click(object? sender, EventArgs e)
     {
@@ -86,11 +93,17 @@ public partial class MainForm : Form
     private async void BtnRefreshClients_Click(object? sender, EventArgs e)
         => await LoadClientsAsync();
 
+    private async void CmbWalkStatus_SelectedIndexChanged(object? sender, EventArgs e)
+        => await LoadWalksAsync();
+
     private async void BtnRefreshUsers_Click(object? sender, EventArgs e)
         => await LoadAllUsersAsync();
 
     private async void TabClients_Enter(object? sender, EventArgs e)
         => await LoadClientsAsync();
+
+    private async void TabWalks_Enter(object? sender, EventArgs e)
+        => await LoadWalksAsync();
 
     private async void TabUsers_Enter(object? sender, EventArgs e)
         => await LoadAllUsersAsync();
@@ -119,6 +132,33 @@ public partial class MainForm : Form
 
             if (dgvClients.Columns.Contains("Id"))
                 dgvClients.Columns["Id"]!.Visible = false;
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { ShowError(ex.Message); }
+    }
+
+    private async Task LoadWalksAsync()
+    {
+        try
+        {
+            var status = Enum.Parse<WalkStatus>(cmbWalkStatus.SelectedItem!.ToString()!);
+            var list = await _walks.GetByStatusAsync(status, _cts.Token);
+
+            dgvWalks.DataSource = list.Select(w => new
+            {
+                w.Id,
+                Dog = w.DogName,
+                Client = w.ClientName,
+                Walker = w.WalkerName ?? "—",
+                Date = w.WalkDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
+                Duration = $"{w.DurationMinutes} min",
+                w.Status,
+                w.Location,
+                w.Notes
+            }).ToList();
+
+            if (dgvWalks.Columns.Contains("Id"))
+                dgvWalks.Columns["Id"]!.Visible = false;
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }

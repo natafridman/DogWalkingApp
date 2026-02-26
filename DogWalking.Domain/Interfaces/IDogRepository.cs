@@ -9,4 +9,5 @@ public interface IDogRepository
     Task AddAsync(Dog dog, CancellationToken ct = default);
     void Update(Dog dog);
     void Remove(Dog dog);
+    Task<Dog?> GetByIdWithWalksAsync(int id, CancellationToken ct = default);
 }

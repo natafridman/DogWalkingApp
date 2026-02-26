@@ -16,6 +16,7 @@ public class UnitOfWork : IUnitOfWork
     public IUserRepository Users { get; }
     public IClientRepository Clients { get; }
     public IDogRepository Dogs { get; }
+    public IWalkEventRepository WalkEvents { get; }
 
     public UnitOfWork(DogWalkingDbContext ctx)
     {
@@ -23,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
         Users = new UserRepository(ctx);
         Clients = new ClientRepository(ctx);
         Dogs = new DogRepository(ctx);
+        WalkEvents = new WalkEventRepository(ctx);
     }
 
     public async Task<int> CommitAsync(CancellationToken ct = default)

@@ -4,9 +4,6 @@ using DogWalking.Domain.ValueObjects;
 
 namespace DogWalking.Domain.Entities;
 
-/// <summary>
-/// Aggregate root representing a dog walking business client.
-/// </summary>
 public class Client
 {
     public int Id { get; private set; }

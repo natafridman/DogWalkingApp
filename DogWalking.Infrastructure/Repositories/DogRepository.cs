@@ -29,4 +29,10 @@ public class DogRepository : IDogRepository
 
     public void Update(Dog dog) => _ctx.Dogs.Update(dog);
     public void Remove(Dog dog) => _ctx.Dogs.Remove(dog);
+
+    public async Task<Dog?> GetByIdWithWalksAsync(int id, CancellationToken ct = default)
+        => await _ctx.Dogs
+            .Include(d => d.Client)
+            .Include(d => d.WalkEvents)
+            .FirstOrDefaultAsync(d => d.Id == id, ct);
 }

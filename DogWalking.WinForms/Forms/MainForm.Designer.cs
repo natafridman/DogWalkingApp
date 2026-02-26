@@ -21,6 +21,11 @@ partial class MainForm
         btnRefreshClients = new Button();
         dgvClients = new DataGridView();
 
+        tabWalks = new TabPage();
+        pnlWalksToolbar = new Panel();
+        cmbWalkStatus = new ComboBox();
+        dgvWalks = new DataGridView();
+
         tabUsers = new TabPage();
         pnlUsersToolbar = new Panel();
         btnRefreshUsers = new Button();
@@ -28,8 +33,10 @@ partial class MainForm
 
         pnlTopBar.SuspendLayout();
         tabClients.SuspendLayout();
+        tabWalks.SuspendLayout();
         tabUsers.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)dgvClients).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)dgvWalks).BeginInit();
         ((System.ComponentModel.ISupportInitialize)dgvAllUsers).BeginInit();
         SuspendLayout();
 
@@ -74,6 +81,7 @@ partial class MainForm
 
         // ── tabs ───────────────────────────────────────
         tabs.Controls.Add(tabClients);
+        tabs.Controls.Add(tabWalks);
         tabs.Controls.Add(tabUsers);
         tabs.Dock = DockStyle.Fill;
         tabs.Font = new Font("Segoe UI", 9F);
@@ -127,6 +135,40 @@ partial class MainForm
         dgvClients.RowHeadersVisible = false;
         dgvClients.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvClients.Size = new Size(1005, 525);
+
+        // ═══ ADMIN TAB: Walk Events ══════════════════
+        tabWalks.BackColor = Color.WhiteSmoke;
+        tabWalks.Controls.Add(dgvWalks);
+        tabWalks.Controls.Add(pnlWalksToolbar);
+        tabWalks.Name = "tabWalks";
+        tabWalks.Padding = new Padding(3);
+        tabWalks.Text = "Walk Events";
+        tabWalks.Enter += TabWalks_Enter;
+
+        pnlWalksToolbar.Controls.Add(cmbWalkStatus);
+        pnlWalksToolbar.Location = new Point(10, 8);
+        pnlWalksToolbar.Name = "pnlWalksToolbar";
+        pnlWalksToolbar.Size = new Size(1000, 38);
+
+        cmbWalkStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbWalkStatus.Location = new Point(0, 7);
+        cmbWalkStatus.Name = "cmbWalkStatus";
+        cmbWalkStatus.Size = new Size(160, 23);
+        cmbWalkStatus.SelectedIndexChanged += CmbWalkStatus_SelectedIndexChanged;
+
+        dgvWalks.AllowUserToAddRows = false;
+        dgvWalks.AllowUserToDeleteRows = false;
+        dgvWalks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvWalks.BackgroundColor = Color.White;
+        dgvWalks.BorderStyle = BorderStyle.None;
+        dgvWalks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dgvWalks.Font = new Font("Segoe UI", 9F);
+        dgvWalks.Location = new Point(10, 56);
+        dgvWalks.Name = "dgvWalks";
+        dgvWalks.ReadOnly = true;
+        dgvWalks.RowHeadersVisible = false;
+        dgvWalks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        dgvWalks.Size = new Size(1005, 525);
 
         // ═══ ADMIN TAB: Users ═════════════════════════
         tabUsers.BackColor = Color.WhiteSmoke;
@@ -182,8 +224,10 @@ partial class MainForm
         pnlTopBar.ResumeLayout(false);
         pnlTopBar.PerformLayout();
         tabClients.ResumeLayout(false);
+        tabWalks.ResumeLayout(false);
         tabUsers.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)dgvClients).EndInit();
+        ((System.ComponentModel.ISupportInitialize)dgvWalks).EndInit();
         ((System.ComponentModel.ISupportInitialize)dgvAllUsers).EndInit();
         ResumeLayout(false);
     }
@@ -203,6 +247,12 @@ partial class MainForm
     private TextBox txtSearchClients;
     private Button btnRefreshClients;
     private DataGridView dgvClients;
+
+    // Admin: Walk Events
+    private TabPage tabWalks;
+    private Panel pnlWalksToolbar;
+    private ComboBox cmbWalkStatus;
+    private DataGridView dgvWalks;
 
     // Admin: Users
     private TabPage tabUsers;
