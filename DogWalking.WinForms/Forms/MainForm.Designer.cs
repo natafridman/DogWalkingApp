@@ -14,7 +14,6 @@ partial class MainForm
         btnLogout = new Button();
         tabs = new TabControl();
 
-        // Admin tabs
         tabClients = new TabPage();
         pnlClientsToolbar = new Panel();
         txtSearchClients = new TextBox();
@@ -24,7 +23,13 @@ partial class MainForm
         tabWalks = new TabPage();
         pnlWalksToolbar = new Panel();
         cmbWalkStatus = new ComboBox();
+        btnNewWalk = new Button();
         dgvWalks = new DataGridView();
+
+        tabWalkers = new TabPage();
+        pnlWalkersToolbar = new Panel();
+        btnRefreshWalkers = new Button();
+        dgvWalkers = new DataGridView();
 
         tabUsers = new TabPage();
         pnlUsersToolbar = new Panel();
@@ -34,9 +39,11 @@ partial class MainForm
         pnlTopBar.SuspendLayout();
         tabClients.SuspendLayout();
         tabWalks.SuspendLayout();
+        tabWalkers.SuspendLayout();
         tabUsers.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)dgvClients).BeginInit();
         ((System.ComponentModel.ISupportInitialize)dgvWalks).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)dgvWalkers).BeginInit();
         ((System.ComponentModel.ISupportInitialize)dgvAllUsers).BeginInit();
         SuspendLayout();
 
@@ -82,6 +89,7 @@ partial class MainForm
         // ── tabs ───────────────────────────────────────
         tabs.Controls.Add(tabClients);
         tabs.Controls.Add(tabWalks);
+        tabs.Controls.Add(tabWalkers);
         tabs.Controls.Add(tabUsers);
         tabs.Dock = DockStyle.Fill;
         tabs.Font = new Font("Segoe UI", 9F);
@@ -146,6 +154,7 @@ partial class MainForm
         tabWalks.Enter += TabWalks_Enter;
 
         pnlWalksToolbar.Controls.Add(cmbWalkStatus);
+        pnlWalksToolbar.Controls.Add(btnNewWalk);
         pnlWalksToolbar.Location = new Point(10, 8);
         pnlWalksToolbar.Name = "pnlWalksToolbar";
         pnlWalksToolbar.Size = new Size(1000, 38);
@@ -155,6 +164,18 @@ partial class MainForm
         cmbWalkStatus.Name = "cmbWalkStatus";
         cmbWalkStatus.Size = new Size(160, 23);
         cmbWalkStatus.SelectedIndexChanged += CmbWalkStatus_SelectedIndexChanged;
+
+        btnNewWalk.AutoSize = true;
+        btnNewWalk.BackColor = Color.FromArgb(30, 70, 150);
+        btnNewWalk.FlatStyle = FlatStyle.Flat;
+        btnNewWalk.Font = new Font("Segoe UI", 9F);
+        btnNewWalk.ForeColor = Color.White;
+        btnNewWalk.Location = new Point(180, 5);
+        btnNewWalk.Name = "btnNewWalk";
+        btnNewWalk.Size = new Size(100, 28);
+        btnNewWalk.Text = "+ New Walk";
+        btnNewWalk.UseVisualStyleBackColor = false;
+        btnNewWalk.Click += BtnNewWalk_Click;
 
         dgvWalks.AllowUserToAddRows = false;
         dgvWalks.AllowUserToDeleteRows = false;
@@ -169,6 +190,46 @@ partial class MainForm
         dgvWalks.RowHeadersVisible = false;
         dgvWalks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvWalks.Size = new Size(1005, 525);
+
+        // ═══ ADMIN TAB: Walkers ══════════════════════
+        tabWalkers.BackColor = Color.WhiteSmoke;
+        tabWalkers.Controls.Add(dgvWalkers);
+        tabWalkers.Controls.Add(pnlWalkersToolbar);
+        tabWalkers.Name = "tabWalkers";
+        tabWalkers.Padding = new Padding(3);
+        tabWalkers.Text = "\U0001f6b6 Walkers";
+        tabWalkers.Enter += TabWalkers_Enter;
+
+        pnlWalkersToolbar.Controls.Add(btnRefreshWalkers);
+        pnlWalkersToolbar.Location = new Point(10, 8);
+        pnlWalkersToolbar.Name = "pnlWalkersToolbar";
+        pnlWalkersToolbar.Size = new Size(1000, 38);
+
+        btnRefreshWalkers.AutoSize = true;
+        btnRefreshWalkers.BackColor = Color.FromArgb(30, 70, 150);
+        btnRefreshWalkers.FlatStyle = FlatStyle.Flat;
+        btnRefreshWalkers.Font = new Font("Segoe UI", 9F);
+        btnRefreshWalkers.ForeColor = Color.White;
+        btnRefreshWalkers.Location = new Point(0, 5);
+        btnRefreshWalkers.Name = "btnRefreshWalkers";
+        btnRefreshWalkers.Size = new Size(90, 28);
+        btnRefreshWalkers.Text = "\u21bb Refresh";
+        btnRefreshWalkers.UseVisualStyleBackColor = false;
+        btnRefreshWalkers.Click += BtnRefreshWalkers_Click;
+
+        dgvWalkers.AllowUserToAddRows = false;
+        dgvWalkers.AllowUserToDeleteRows = false;
+        dgvWalkers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvWalkers.BackgroundColor = Color.White;
+        dgvWalkers.BorderStyle = BorderStyle.None;
+        dgvWalkers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dgvWalkers.Font = new Font("Segoe UI", 9F);
+        dgvWalkers.Location = new Point(10, 56);
+        dgvWalkers.Name = "dgvWalkers";
+        dgvWalkers.ReadOnly = true;
+        dgvWalkers.RowHeadersVisible = false;
+        dgvWalkers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        dgvWalkers.Size = new Size(1005, 525);
 
         // ═══ ADMIN TAB: Users ═════════════════════════
         tabUsers.BackColor = Color.WhiteSmoke;
@@ -225,9 +286,11 @@ partial class MainForm
         pnlTopBar.PerformLayout();
         tabClients.ResumeLayout(false);
         tabWalks.ResumeLayout(false);
+        tabWalkers.ResumeLayout(false);
         tabUsers.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)dgvClients).EndInit();
         ((System.ComponentModel.ISupportInitialize)dgvWalks).EndInit();
+        ((System.ComponentModel.ISupportInitialize)dgvWalkers).EndInit();
         ((System.ComponentModel.ISupportInitialize)dgvAllUsers).EndInit();
         ResumeLayout(false);
     }
@@ -252,7 +315,14 @@ partial class MainForm
     private TabPage tabWalks;
     private Panel pnlWalksToolbar;
     private ComboBox cmbWalkStatus;
+    private Button btnNewWalk;
     private DataGridView dgvWalks;
+
+    // Admin: Walkers
+    private TabPage tabWalkers;
+    private Panel pnlWalkersToolbar;
+    private Button btnRefreshWalkers;
+    private DataGridView dgvWalkers;
 
     // Admin: Users
     private TabPage tabUsers;

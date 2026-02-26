@@ -23,6 +23,7 @@ static class Program
         services.AddTransient<LoginForm>();
         services.AddTransient<MainForm>();
         services.AddTransient<DogDialog>();
+        services.AddTransient<WalkEventForm>();
 
         ServiceProvider = services.BuildServiceProvider();
 

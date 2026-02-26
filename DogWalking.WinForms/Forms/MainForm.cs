@@ -29,7 +29,6 @@ public partial class MainForm : Form
         _walks = sp.GetRequiredService<IWalkEventService>();
         _users = sp.GetRequiredService<IUserService>();
         _dogSvc = sp.GetRequiredService<IDogService>();
-
         InitializeComponent();
 
         cmbWalkStatus.Items.AddRange(Enum.GetNames<WalkStatus>());
@@ -67,7 +66,7 @@ public partial class MainForm : Form
         switch (_userRole)
         {
             case "Admin":
-                ShowTabs(tabClients, tabWalks, tabUsers);
+                ShowTabs(tabClients, tabWalks, tabWalkers, tabUsers);
                 await LoadClientsAsync();
                 break;
         }
@@ -96,6 +95,16 @@ public partial class MainForm : Form
     private async void CmbWalkStatus_SelectedIndexChanged(object? sender, EventArgs e)
         => await LoadWalksAsync();
 
+    private async void BtnNewWalk_Click(object? sender, EventArgs e)
+    {
+        var f = _scope.ServiceProvider.GetRequiredService<WalkEventForm>();
+        if (f.ShowDialog() == DialogResult.OK)
+            await LoadWalksAsync();
+    }
+
+    private async void BtnRefreshWalkers_Click(object? sender, EventArgs e)
+        => await LoadWalkersAsync();
+
     private async void BtnRefreshUsers_Click(object? sender, EventArgs e)
         => await LoadAllUsersAsync();
 
@@ -104,6 +113,9 @@ public partial class MainForm : Form
 
     private async void TabWalks_Enter(object? sender, EventArgs e)
         => await LoadWalksAsync();
+
+    private async void TabWalkers_Enter(object? sender, EventArgs e)
+        => await LoadWalkersAsync();
 
     private async void TabUsers_Enter(object? sender, EventArgs e)
         => await LoadAllUsersAsync();
@@ -159,6 +171,28 @@ public partial class MainForm : Form
 
             if (dgvWalks.Columns.Contains("Id"))
                 dgvWalks.Columns["Id"]!.Visible = false;
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { ShowError(ex.Message); }
+    }
+
+    private async Task LoadWalkersAsync()
+    {
+        try
+        {
+            var list = await _users.GetWalkersAsync(_cts.Token);
+            dgvWalkers.DataSource = list.Select(u => new
+            {
+                u.Id,
+                u.FullName,
+                u.Username,
+                Phone = u.Phone ?? "—",
+                Email = u.Email ?? "—",
+                Active = u.IsActive
+            }).ToList();
+
+            if (dgvWalkers.Columns.Contains("Id"))
+                dgvWalkers.Columns["Id"]!.Visible = false;
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }
