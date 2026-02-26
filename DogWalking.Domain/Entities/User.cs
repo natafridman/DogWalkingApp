@@ -4,8 +4,8 @@ using DogWalking.Domain.Exceptions;
 namespace DogWalking.Domain.Entities;
 
 /// <summary>
-/// Application user.  Role determines what screens and actions are available.
-/// Passwords are stored as hashes — never in plain text.
+/// Application user.  
+/// Role determines what screens and actions are available.
 /// </summary>
 public class User
 {

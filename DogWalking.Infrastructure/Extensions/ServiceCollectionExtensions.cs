@@ -9,7 +9,7 @@ using DogWalking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DogWalking.Extensions.Infrastructure;
+namespace DogWalking.Infrastructure.Extensions;
 
 /// <summary>
 /// Extension method that registers all infrastructure and application services.
