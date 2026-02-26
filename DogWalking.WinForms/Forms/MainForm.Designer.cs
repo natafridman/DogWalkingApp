@@ -36,6 +36,10 @@ partial class MainForm
         btnRefreshUsers = new Button();
         dgvAllUsers = new DataGridView();
 
+        tabMyDogs = new TabPage();
+        tabMyWalks = new TabPage();
+        tabMySubscription = new TabPage();
+
         pnlTopBar.SuspendLayout();
         tabClients.SuspendLayout();
         tabWalks.SuspendLayout();
@@ -91,6 +95,9 @@ partial class MainForm
         tabs.Controls.Add(tabWalks);
         tabs.Controls.Add(tabWalkers);
         tabs.Controls.Add(tabUsers);
+        tabs.Controls.Add(tabMyDogs);
+        tabs.Controls.Add(tabMyWalks);
+        tabs.Controls.Add(tabMySubscription);
         tabs.Dock = DockStyle.Fill;
         tabs.Font = new Font("Segoe UI", 9F);
         tabs.Location = new Point(0, 46);
@@ -271,6 +278,19 @@ partial class MainForm
         dgvAllUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvAllUsers.Size = new Size(1005, 525);
 
+        // ═══ CLIENT TABS (populated at runtime) ══════
+        tabMyDogs.BackColor = Color.WhiteSmoke;
+        tabMyDogs.Name = "tabMyDogs";
+        tabMyDogs.Text = "\U0001f415 My Dogs";
+
+        tabMyWalks.BackColor = Color.WhiteSmoke;
+        tabMyWalks.Name = "tabMyWalks";
+        tabMyWalks.Text = "\U0001f9ae My Walks";
+
+        tabMySubscription.BackColor = Color.WhiteSmoke;
+        tabMySubscription.Name = "tabMySubscription";
+        tabMySubscription.Text = "\U0001f4cb My Subscription";
+
         // ── MainForm ──────────────────────────────────
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -329,4 +349,9 @@ partial class MainForm
     private Panel pnlUsersToolbar;
     private Button btnRefreshUsers;
     private DataGridView dgvAllUsers;
+
+    // Client tabs
+    private TabPage tabMyDogs;
+    private TabPage tabMyWalks;
+    private TabPage tabMySubscription;
 }
