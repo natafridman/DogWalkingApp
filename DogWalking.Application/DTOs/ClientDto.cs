@@ -9,6 +9,7 @@ public record ClientDto(
     string Email,
     SubscriptionType Subscription,
     bool IsActive,
+    int DogCount,
     string Zone,
     string Address = ""
 );

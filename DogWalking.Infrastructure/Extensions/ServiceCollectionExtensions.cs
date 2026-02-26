@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IDogService, DogService>();
 
         services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
 

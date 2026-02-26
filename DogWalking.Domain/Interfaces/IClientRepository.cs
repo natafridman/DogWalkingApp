@@ -12,4 +12,8 @@ public interface IClientRepository
     Task AddAsync(Client client, CancellationToken ct = default);
     void Update(Client client);
     void Remove(Client client);
+    Task<Client?> GetByIdWithDogsAsync(int id, CancellationToken ct = default);
+    Task<Client?> GetByUserIdAsync(int userId, CancellationToken ct = default);
+    Task<IEnumerable<Client>> GetAllActiveAsync(CancellationToken ct = default);
+    Task<IEnumerable<Client>> SearchAsync(string term, CancellationToken ct = default);
 }

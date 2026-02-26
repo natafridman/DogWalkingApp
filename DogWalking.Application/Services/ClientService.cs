@@ -25,7 +25,33 @@ public class ClientService : IClientService
         _clientValidator = clientValidator;
     }
 
- 
+    public async Task<IEnumerable<ClientDto>> GetAllActiveAsync(CancellationToken ct = default)
+    {
+        var clients = await _uow.Clients.GetAllActiveAsync(ct);
+        return clients.Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<ClientDto>> SearchAsync(string term, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(term))
+            return await GetAllActiveAsync(ct);
+
+        var clients = await _uow.Clients.SearchAsync(term.Trim(), ct);
+        return clients.Select(MapToDto);
+    }
+
+    public async Task<ClientDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        var client = await _uow.Clients.GetByIdWithDogsAsync(id, ct);
+        return client is null ? null : MapToDto(client);
+    }
+
+    public async Task<ClientDto?> GetByUserIdAsync(int userId, CancellationToken ct = default)
+    {
+        var client = await _uow.Clients.GetByUserIdAsync(userId, ct);
+        return client is null ? null : MapToDto(client);
+    }
+
     public async Task<ClientDto> CreateAsync(CreateClientDto dto, CancellationToken ct = default)
     {
         await _clientValidator.ValidateAndThrowAsync(dto, ct);
@@ -75,6 +101,18 @@ public class ClientService : IClientService
         return MapToDto(client);
     }
 
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    {
+        var client = await _uow.Clients.GetByIdWithDogsAsync(id, ct)
+            ?? throw new KeyNotFoundException($"Client {id} not found.");
+
+        // Domain entity enforces the no-active-walks rule
+        client.Deactivate();
+
+        _uow.Clients.Update(client);
+        await _uow.CommitAsync(ct);
+    }
+
     private static ClientDto MapToDto(Client c) => new(
         c.Id,
         c.Name,
@@ -82,6 +120,7 @@ public class ClientService : IClientService
         c.Email,
         c.Subscription,
         c.IsActive,
+        c.Dogs.Count,
         c.Zone,
         c.Address
     );

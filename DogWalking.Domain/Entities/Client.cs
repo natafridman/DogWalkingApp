@@ -26,6 +26,9 @@ public class Client
     /// <summary>Optional link to the User account for this client (role = Client).</summary>
     public int? UserId { get; private set; }
 
+    private readonly List<Dog> _dogs = new();
+    public IReadOnlyCollection<Dog> Dogs => _dogs.AsReadOnly();
+
     private Client() { }
 
     public Client(string name, string phoneNumber, string email,
@@ -43,6 +46,8 @@ public class Client
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void Deactivate() => IsActive = false;
 
     public void Update(string name, string phoneNumber, string email, string zone = "")
     {
