@@ -8,7 +8,7 @@ static class Program
 {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
-    const string conn = "Server=localhost;Database=DogWalkingApp;Trusted_Connection=True;";
+    const string conn = "Server=localhost;Database=DogWalkingApp;Trusted_Connection=True;TrustServerCertificate=True";
 
     [STAThread]
     static async Task Main()
