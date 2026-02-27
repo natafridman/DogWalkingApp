@@ -35,6 +35,7 @@ public class WalkEventRepository : IWalkEventRepository
             .Where(w => w.Status == status)
             .Include(w => w.Dog).ThenInclude(d => d.Client)
             .Include(w => w.Walker)
+            .Include(w => w.Declines)
             .OrderBy(w => w.WalkDate)
             .ToListAsync(ct);
 

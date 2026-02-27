@@ -36,10 +36,12 @@ public partial class MainForm : Form
 
     // Walker calendar (created at runtime)
     private WalkCalendarPanel _calWalker = null!;
+    private IEnumerable<WalkerAvailabilityDto> _cachedAvailability = [];
 
     // Client controls (created at runtime)
     private DataGridView      _dgvMyDogs = null!;
     private WalkCalendarPanel _calClient = null!;
+    private SubscriptionType  _clientSubscription;
 
     // Walker availability config controls (created at runtime)
     private TextBox      _cfgPhone  = null!;
@@ -114,6 +116,7 @@ public partial class MainForm : Form
                     return;
                 }
                 _clientId = client.Id;
+                _clientSubscription = client.Subscription;
                 PopulateMyDogsTab();
                 PopulateMyClientWalksTab();
                 PopulateMySubscriptionTab(client);
@@ -295,10 +298,58 @@ public partial class MainForm : Form
             await CancelWalkWithNoteAsync(_calWalker.DetailGrid, LoadMyScheduleAsync));
         _calWalker.DetailGrid.ContextMenuStrip = ctx;
 
+        // ── Summary panel: dog count + availability ───────────────────
+        var pnlSummary = new Panel
+        {
+            Dock      = DockStyle.Bottom,
+            Height    = 50,
+            Padding   = new Padding(8, 6, 8, 6),
+            BackColor = Color.FromArgb(248, 248, 248)
+        };
+        var lblDogCount = new Label
+        {
+            Text     = "Dogs to walk: 0",
+            Location = new Point(8, 4),
+            AutoSize = true,
+            Font     = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+        var lblAvail = new Label
+        {
+            Text     = "Your availability: --",
+            Location = new Point(8, 24),
+            AutoSize = true,
+            Font     = new Font("Segoe UI", 9)
+        };
+        pnlSummary.Controls.AddRange(new Control[] { lblDogCount, lblAvail });
+
+        _calWalker.DaySelected += (day, walks) =>
+        {
+            int count = walks.Count(w => w.Status is WalkStatus.Accepted or WalkStatus.InProgress);
+            lblDogCount.Text = $"Dogs to walk: {count}";
+
+            if (day > 0 && _calWalker.SelectedDate.HasValue)
+            {
+                var dow = _calWalker.SelectedDate.Value.DayOfWeek;
+                var match = _cachedAvailability.FirstOrDefault(s => s.DayOfWeek == dow);
+                lblAvail.Text = match != null
+                    ? $"Your availability: {match.StartTime:HH:mm} \u2013 {match.EndTime:HH:mm} ({match.Zone})"
+                    : "Your availability: No availability set";
+            }
+            else
+            {
+                lblAvail.Text = "Your availability: --";
+            }
+        };
+
         tabMySchedule.Controls.Add(_calWalker);
+        tabMySchedule.Controls.Add(pnlSummary);
     }
 
-    private Task LoadMyScheduleAsync() => RunAsync(() => _calWalker.LoadAsync());
+    private Task LoadMyScheduleAsync() => RunAsync(async () =>
+    {
+        await _calWalker.LoadAsync();
+        _cachedAvailability = await _availSvc.GetByWalkerIdAsync(_userId);
+    });
 
     /// <summary>
     /// Walker releases an accepted walk: prompts for an optional reason,
@@ -553,7 +604,37 @@ public partial class MainForm : Form
             Btn("\U0001f5d1\ufe0f Delete",  260, async () => await DeleteMyWalkAsync())
         });
 
+        // ── Remaining walks panel ─────────────────────────────────────
+        var pnlRemaining = new Panel
+        {
+            Dock      = DockStyle.Bottom,
+            Height    = 35,
+            Padding   = new Padding(8, 6, 8, 6),
+            BackColor = Color.FromArgb(248, 248, 248)
+        };
+        var lblRemaining = new Label
+        {
+            Text     = "Remaining walks this month: --",
+            Location = new Point(8, 6),
+            AutoSize = true,
+            Font     = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+        pnlRemaining.Controls.Add(lblRemaining);
+
+        _calClient.WalksLoaded += (month, walks) =>
+        {
+            var strategy = WalkLimitStrategyFactory.Create(_clientSubscription);
+            int activeCount = walks
+                .Where(w => w.WalkDate.ToLocalTime().Year == month.Year
+                         && w.WalkDate.ToLocalTime().Month == month.Month)
+                .Count(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
+                                     or WalkStatus.Accepted  or WalkStatus.InProgress);
+            int remaining = Math.Max(0, strategy.MaxWalksPerMonth - activeCount);
+            lblRemaining.Text = $"Remaining walks this month: {remaining} / {strategy.MaxWalksPerMonth} ({strategy.Description})";
+        };
+
         tabMyWalks.Controls.Add(_calClient);
+        tabMyWalks.Controls.Add(pnlRemaining);
         tabMyWalks.Controls.Add(pnl);
     }
 
@@ -629,7 +710,7 @@ public partial class MainForm : Form
 
         dlg.Controls.Add(new Label
         {
-            Text     = isProposed ? "Rejection reason (required to decline):" : "Rejection reason (optional):",
+            Text     = isProposed ? "Decline reason (required):" : "Decline reason (optional):",
             Location = new Point(16, 62), AutoSize = true
         });
         var txtNote = new TextBox { Location = new Point(16, 82), Width = 404, Height = 60, Multiline = true };
@@ -688,11 +769,11 @@ public partial class MainForm : Form
                 if (walk.Status == WalkStatus.Requested)
                     await _walks.ClaimWalkAsync(walk.Id, _userId);
                 else
-                    await _walks.WalkerRespondAsync(new WalkerResponseDto(walk.Id, true));
+                    await _walks.WalkerRespondAsync(new WalkerResponseDto(walk.Id, _userId, true));
             }
             else
             {
-                await _walks.WalkerRespondAsync(new WalkerResponseDto(walk.Id, false, rejectionNote));
+                await _walks.WalkerRespondAsync(new WalkerResponseDto(walk.Id, _userId, false, rejectionNote));
             }
             await LoadMyScheduleAsync();
         }

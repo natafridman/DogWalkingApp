@@ -19,7 +19,7 @@ public abstract class WalkLimitStrategyBase : IWalkLimitStrategy
     public void ValidateWalkAllowed(IEnumerable<WalkEvent> existingWalksThisMonth, DateTime proposedDate)
     {
         // Only count walks that are still "in-flight" against the limit.
-        // Cancelled, Rejected, and Completed walks should not block new requests.
+        // Cancelled and Completed walks should not block new requests.
         var activeWalks = existingWalksThisMonth
             .Where(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
                                  or WalkStatus.Accepted  or WalkStatus.InProgress)

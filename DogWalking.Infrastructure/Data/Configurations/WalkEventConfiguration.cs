@@ -22,12 +22,24 @@ public class WalkEventConfiguration : IEntityTypeConfiguration<WalkEvent>
         builder.Property(w => w.CreatedAt).IsRequired();
         builder.Property(w => w.WalkerId).IsRequired(false);
 
+        // Optimistic concurrency — prevents two walkers from claiming the same walk
+        builder.Property(w => w.RowVersion).IsRowVersion();
+
         // Walker relationship — nullable FK to User
         builder.HasOne(w => w.Walker)
                .WithMany(u => u.AssignedWalks)
                .HasForeignKey(w => w.WalkerId)
                .OnDelete(DeleteBehavior.SetNull)
                .IsRequired(false);
+
+        // Declines — walkers who passed on this walk
+        builder.HasMany(w => w.Declines)
+               .WithOne(d => d.WalkEvent)
+               .HasForeignKey(d => d.WalkEventId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(w => w.Declines)
+               .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // Composite index for efficient subscription validation queries
         builder.HasIndex(w => new { w.DogId, w.WalkDate });

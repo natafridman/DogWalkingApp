@@ -21,9 +21,13 @@ public class WalkEvent
     public string?       Notes               { get; private set; }
     public RecurrenceType RecurrenceType   { get; private set; }
     public DateTime  CreatedAt           { get; private set; }
+    public byte[]   RowVersion          { get; private set; } = [];
 
     public Dog   Dog    { get; private set; } = null!;
     public User? Walker { get; private set; }
+
+    private readonly List<WalkDecline> _declines = new();
+    public IReadOnlyCollection<WalkDecline> Declines => _declines.AsReadOnly();
 
     // Required by EF Core
     private WalkEvent() { }
@@ -45,7 +49,7 @@ public class WalkEvent
 
     /// <summary>
     /// Enforces valid status transitions.
-    /// Use the semantic helpers (ProposeToWalker, AcceptByWalker, RejectByWalker)
+    /// Use the semantic helpers (ProposeToWalker, AcceptByWalker, DeclineByWalker)
     /// for transitions that carry additional data.
     /// </summary>
     public void TransitionTo(WalkStatus newStatus)
@@ -54,10 +58,8 @@ public class WalkEvent
         {
             (WalkStatus.Requested,  WalkStatus.Proposed)   => true,
             (WalkStatus.Requested,  WalkStatus.Cancelled)  => true,
-            (WalkStatus.Requested,  WalkStatus.Rejected)   => true,  // walker declines an open request
             (WalkStatus.Proposed,   WalkStatus.Accepted)   => true,
-            (WalkStatus.Proposed,   WalkStatus.Rejected)   => true,
-            (WalkStatus.Rejected,   WalkStatus.Requested)  => true,  // re-queue
+            (WalkStatus.Proposed,   WalkStatus.Requested)  => true,  // walker declines — re-queue
             (WalkStatus.Accepted,   WalkStatus.Requested)  => true,  // walker releases an accepted walk
             (WalkStatus.Accepted,   WalkStatus.InProgress) => true,
             (WalkStatus.Accepted,   WalkStatus.Cancelled)  => true,
@@ -101,14 +103,22 @@ public class WalkEvent
     }
 
     /// <summary>
-    /// Walker rejects the proposal — clears the walker assignment
-    /// and re-queues the walk as Requested so another walker can be proposed.
+    /// Walker declines the walk. If the walk was Proposed to this walker,
+    /// it transitions back to Requested. If it was already Requested (open request),
+    /// the status stays unchanged. In both cases the walker is recorded as having
+    /// declined so the walk no longer appears in their schedule.
     /// </summary>
-    public void RejectByWalker()
+    public void DeclineByWalker(int walkerId)
     {
-        TransitionTo(WalkStatus.Rejected);
-        WalkerId             = null;
-        EstimatedArrivalTime = null;
+        if (Status == WalkStatus.Proposed)
+        {
+            TransitionTo(WalkStatus.Requested);
+            WalkerId             = null;
+            EstimatedArrivalTime = null;
+        }
+
+        if (!_declines.Any(d => d.WalkerId == walkerId))
+            _declines.Add(new WalkDecline(walkerId));
     }
 
     public void UpdateNotes(string? notes)     => Notes    = notes;

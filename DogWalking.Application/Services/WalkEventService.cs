@@ -72,6 +72,10 @@ public class WalkEventService : IWalkEventService
 
         return requested.Where(w =>
         {
+            // Skip walks this walker has already declined
+            if (w.Declines.Any(d => d.WalkerId == walkerId))
+                return false;
+
             var local    = w.WalkDate.ToLocalTime();
             var walkTime = TimeOnly.FromDateTime(local);
             var walkDay  = local.DayOfWeek;
@@ -214,9 +218,9 @@ public class WalkEventService : IWalkEventService
         }
         else
         {
-            walk.RejectByWalker();
-            if (!string.IsNullOrWhiteSpace(dto.RejectionNote))
-                walk.UpdateNotes(dto.RejectionNote);
+            walk.DeclineByWalker(dto.WalkerId);
+            if (!string.IsNullOrWhiteSpace(dto.DeclineNote))
+                walk.UpdateNotes(dto.DeclineNote);
         }
 
         _uow.WalkEvents.Update(walk);

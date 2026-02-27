@@ -72,13 +72,15 @@ public class WalkEventEntityTests
     }
 
     [Fact]
-    public void RejectByWalker_ClearsWalkerAndGoesToRejected()
+    public void DeclineByWalker_ClearsWalkerAndGoesToRequested()
     {
         var w = Valid();
         w.ProposeToWalker(5);
-        w.RejectByWalker();
-        Assert.Equal(WalkStatus.Rejected, w.Status);
+        w.DeclineByWalker(5);
+        Assert.Equal(WalkStatus.Requested, w.Status);
         Assert.Null(w.WalkerId);
+        Assert.Single(w.Declines);
+        Assert.Equal(5, w.Declines.First().WalkerId);
     }
 
     [Fact]

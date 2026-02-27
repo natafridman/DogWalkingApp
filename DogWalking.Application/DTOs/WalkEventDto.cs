@@ -32,9 +32,9 @@ public record CreateWalkEventDto(
 /// <summary>Admin/system proposes a specific walker for a walk request.</summary>
 public record ProposeWalkDto(int WalkEventId, int WalkerId, DateTime? EstimatedArrival = null);
 
-/// <summary>Walker responds to a proposal — accepted or rejected.
-/// RejectionNote is required when Accepted = false and the walk was Proposed.</summary>
-public record WalkerResponseDto(int WalkEventId, bool Accepted, string? RejectionNote = null);
+/// <summary>Walker responds to a walk request or proposal.
+/// DeclineNote is required when Accepted = false and the walk was Proposed.</summary>
+public record WalkerResponseDto(int WalkEventId, int WalkerId, bool Accepted, string? DeclineNote = null);
 
 public record UpdateWalkStatusDto(int Id, WalkStatus NewStatus);
 

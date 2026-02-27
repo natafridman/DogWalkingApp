@@ -55,6 +55,12 @@ public sealed class WalkCalendarPanel : Panel
     /// <summary>Fired when the client clicks "Walker Info" on an accepted walk row.</summary>
     public event Action<WalkEventDto>? WalkerInfoButtonClicked;
 
+    /// <summary>Fired when a day is selected (clicked or loaded). Passes day number and walks for that day.</summary>
+    public event Action<int, List<WalkEventDto>>? DaySelected;
+
+    /// <summary>Fired after walks are loaded. Passes first-of-month and all walks.</summary>
+    public event Action<DateTime, List<WalkEventDto>>? WalksLoaded;
+
     // ── Private state ───────────────────────────────────────────────────────
 
     private readonly Func<Task<IEnumerable<WalkEventDto>>> _loader;
@@ -202,7 +208,23 @@ public sealed class WalkCalendarPanel : Panel
 
         _dgv.CellContentClick += OnDetailCellContentClick;
 
+        // ── Color legend ──────────────────────────────────────────────────
+        var legend = new FlowLayoutPanel
+        {
+            Dock          = DockStyle.Top,
+            Height        = 26,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents  = false,
+            Padding       = new Padding(6, 4, 0, 0),
+            BackColor     = Color.White
+        };
+        AddLegendItem(legend, ColRequested,  "Pending");
+        AddLegendItem(legend, ColAccepted,   "Accepted");
+        AddLegendItem(legend, ColInProgress, "In Progress");
+        AddLegendItem(legend, ColMixed,      "Mixed");
+
         Controls.Add(_dgv);
+        Controls.Add(legend);
         Controls.Add(_grid);
         Controls.Add(nav);
 
@@ -225,6 +247,7 @@ public sealed class WalkCalendarPanel : Panel
         RebuildGrid();
         UpdateMonthLabel();
         ShowDayWalks(_selectedDay);
+        WalksLoaded?.Invoke(_month, _walks);
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────
@@ -390,6 +413,8 @@ public sealed class WalkCalendarPanel : Panel
                 row.Cells["WalkerInfo"].Style.BackColor = hasWalker ? BtnBlue     : row.DefaultCellStyle.BackColor;
             }
         }
+
+        DaySelected?.Invoke(day, _dayWalks);
     }
 
     private void OnDetailCellContentClick(object? sender, DataGridViewCellEventArgs e)
@@ -408,6 +433,24 @@ public sealed class WalkCalendarPanel : Panel
                 WalkerInfoButtonClicked?.Invoke(walk);
                 break;
         }
+    }
+
+    private static void AddLegendItem(FlowLayoutPanel parent, Color color, string text)
+    {
+        parent.Controls.Add(new Panel
+        {
+            Size        = new Size(14, 14),
+            BackColor   = color,
+            Margin      = new Padding(6, 2, 2, 0),
+            BorderStyle = BorderStyle.FixedSingle
+        });
+        parent.Controls.Add(new Label
+        {
+            Text     = text,
+            AutoSize = true,
+            Font     = new Font("Segoe UI", 8),
+            Margin   = new Padding(0, 2, 8, 0)
+        });
     }
 
     // ── Row record bound to the detail DataGridView ───────────────────────────

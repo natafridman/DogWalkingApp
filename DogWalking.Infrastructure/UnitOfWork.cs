@@ -1,6 +1,8 @@
+using DogWalking.Domain.Exceptions;
 using DogWalking.Domain.Interfaces;
 using DogWalking.Infrastructure.Data;
 using DogWalking.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure;
 
@@ -32,7 +34,17 @@ public class UnitOfWork : IUnitOfWork
     }
 
     public async Task<int> CommitAsync(CancellationToken ct = default)
-        => await _ctx.SaveChangesAsync(ct);
+    {
+        try
+        {
+            return await _ctx.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyException(
+                "This record was modified by another user. Please refresh and try again.", ex);
+        }
+    }
 
     public void Dispose() => _ctx.Dispose();
 }

@@ -80,13 +80,13 @@ public class WalkEventServiceTests : IntegrationTestBase
         var svc = CreateWalkEventService();
 
         await svc.ProposeToWalkerAsync(new ProposeWalkDto(walk.Id, walker.Id));
-        var result = await svc.WalkerRespondAsync(new WalkerResponseDto(walk.Id, true));
+        var result = await svc.WalkerRespondAsync(new WalkerResponseDto(walk.Id, walker.Id, true));
 
         Assert.Equal(WalkStatus.Accepted, result.Status);
     }
 
     [Fact]
-    public async Task WalkerRespondAsync_Reject_ClearsWalkerReturnsToRejected()
+    public async Task WalkerRespondAsync_Decline_ClearsWalkerReturnsToRequested()
     {
         var client = await SeedClientAsync(subscription: SubscriptionType.Basic);
         var dog = await SeedDogAsync(client.Id);
@@ -96,9 +96,9 @@ public class WalkEventServiceTests : IntegrationTestBase
 
         await svc.ProposeToWalkerAsync(new ProposeWalkDto(walk.Id, walker.Id));
         var result = await svc.WalkerRespondAsync(
-            new WalkerResponseDto(walk.Id, false, "Too far away"));
+            new WalkerResponseDto(walk.Id, walker.Id, false, "Too far away"));
 
-        Assert.Equal(WalkStatus.Rejected, result.Status);
+        Assert.Equal(WalkStatus.Requested, result.Status);
         Assert.Null(result.WalkerId);
     }
 
@@ -142,7 +142,7 @@ public class WalkEventServiceTests : IntegrationTestBase
 
         // Propose + accept
         await svc.ProposeToWalkerAsync(new ProposeWalkDto(walk.Id, walker.Id));
-        await svc.WalkerRespondAsync(new WalkerResponseDto(walk.Id, true));
+        await svc.WalkerRespondAsync(new WalkerResponseDto(walk.Id, walker.Id, true));
 
         // Now unaccept
         var result = await svc.UnacceptWalkAsync(walk.Id, "Schedule conflict");

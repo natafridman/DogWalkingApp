@@ -16,6 +16,7 @@ public class DogWalkingDbContext : DbContext
     public DbSet<WalkEvent> WalkEvents => Set<WalkEvent>();
     public DbSet<WalkerAvailability> WalkerAvailabilities => Set<WalkerAvailability>();
     public DbSet<WalkerWorkingArea>  WalkerWorkingAreas   => Set<WalkerWorkingArea>();
+    public DbSet<WalkDecline>        WalkDeclines         => Set<WalkDecline>();
 
     public DogWalkingDbContext(DbContextOptions<DogWalkingDbContext> options) : base(options) { }
 
@@ -27,5 +28,16 @@ public class DogWalkingDbContext : DbContext
         modelBuilder.ApplyConfiguration(new WalkEventConfiguration());
         modelBuilder.ApplyConfiguration(new WalkerAvailabilityConfiguration());
         modelBuilder.ApplyConfiguration(new WalkerWorkingAreaConfiguration());
+        modelBuilder.ApplyConfiguration(new WalkDeclineConfiguration());
+
+        // SQLite doesn't support rowversion — override to a regular concurrency token
+        if (Database.ProviderName?.Contains("Sqlite") == true)
+        {
+            modelBuilder.Entity<WalkEvent>()
+                .Property(w => w.RowVersion)
+                .HasColumnType("BLOB")
+                .HasDefaultValue(Array.Empty<byte>())
+                .IsConcurrencyToken();
+        }
     }
 }
