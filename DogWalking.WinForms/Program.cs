@@ -1,6 +1,9 @@
+using DogWalking.Application.Interfaces;
 using DogWalking.Infrastructure.Extensions;
 using DogWalking.WinForms.Forms;
 using Microsoft.Extensions.DependencyInjection;
+
+using App = System.Windows.Forms.Application;
 
 namespace DogWalking.WinForms;
 
@@ -29,6 +32,13 @@ static class Program
 
         await ServiceProvider.InitializeDatabaseAsync();
 
-        System.Windows.Forms.Application.Run(ServiceProvider.GetRequiredService<LoginForm>());
+        // Start LAN notification listener
+        var notifier = ServiceProvider.GetRequiredService<INotificationService>();
+        await notifier.StartAsync();
+
+        App.Run(ServiceProvider.GetRequiredService<LoginForm>());
+
+        // Clean shutdown
+        await notifier.StopAsync();
     }
 }

@@ -41,12 +41,14 @@ public partial class MainForm : Form
     // Client controls (created at runtime)
     private DataGridView      _dgvMyDogs = null!;
     private WalkCalendarPanel _calClient = null!;
-    private SubscriptionType  _clientSubscription;
 
     // Walker availability config controls (created at runtime)
     private TextBox      _cfgPhone  = null!;
     private TextBox      _cfgEmail  = null!;
     private Label        _cfgStatus = null!;
+
+    // LAN notification service
+    private readonly INotificationService _notifier;
 
     public MainForm(IServiceScopeFactory scopeFactory)
     {
@@ -58,6 +60,7 @@ public partial class MainForm : Form
         _auth     = sp.GetRequiredService<IAuthService>();
         _dogSvc   = sp.GetRequiredService<IDogService>();
         _availSvc = sp.GetRequiredService<IWalkerAvailabilityService>();
+        _notifier = sp.GetRequiredService<INotificationService>();
         InitializeComponent();
 
         // Populate walk status combo (Designer created the control, we fill items here)
@@ -116,7 +119,6 @@ public partial class MainForm : Form
                     return;
                 }
                 _clientId = client.Id;
-                _clientSubscription = client.Subscription;
                 PopulateMyDogsTab();
                 PopulateMyClientWalksTab();
                 PopulateMySubscriptionTab(client);
@@ -124,6 +126,30 @@ public partial class MainForm : Form
                 await LoadMyDogsAsync();
                 break;
         }
+
+        // Subscribe to LAN notifications
+        _notifier.NotificationReceived -= OnNotificationReceived; // avoid double-subscribe
+        _notifier.NotificationReceived += OnNotificationReceived;
+    }
+
+    private void OnNotificationReceived(WalkNotification n)
+    {
+        // Only notify the dog owner when a walker accepts their walk
+        if (_userRole != "Client") return;
+        if (n.ClientId != _clientId) return;
+        if (n.Type is not NotificationType.WalkAccepted
+                   and not NotificationType.WalkClaimed) return;
+
+        if (InvokeRequired)
+            BeginInvoke(() => OnWalkAcceptedByWalker(n));
+        else
+            OnWalkAcceptedByWalker(n);
+    }
+
+    private async void OnWalkAcceptedByWalker(WalkNotification n)
+    {
+        new ToastNotification(this, "Walk Accepted", n.Message, Color.SeaGreen).Show();
+        await LoadClientWalksAsync();
     }
 
     // ── Role-based tab setup ─────────────────────────────────────────
@@ -138,6 +164,7 @@ public partial class MainForm : Form
 
     private void Logout()
     {
+        _notifier.NotificationReceived -= OnNotificationReceived;
         _onLogout?.Invoke();  // Re-shows the LoginForm
         tabs.TabPages.Clear();
         _userId = 0; _userRole = string.Empty; _fullName = string.Empty; _clientId = 0;
@@ -621,16 +648,14 @@ public partial class MainForm : Form
         };
         pnlRemaining.Controls.Add(lblRemaining);
 
-        _calClient.WalksLoaded += (month, walks) =>
+        _calClient.WalksLoaded += async (month, _) =>
         {
-            var strategy = WalkLimitStrategyFactory.Create(_clientSubscription);
-            int activeCount = walks
-                .Where(w => w.WalkDate.ToLocalTime().Year == month.Year
-                         && w.WalkDate.ToLocalTime().Month == month.Month)
-                .Count(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
-                                     or WalkStatus.Accepted  or WalkStatus.InProgress);
-            int remaining = Math.Max(0, strategy.MaxWalksPerMonth - activeCount);
-            lblRemaining.Text = $"Remaining walks this month: {remaining} / {strategy.MaxWalksPerMonth} ({strategy.Description})";
+            try
+            {
+                var summary = await _walks.GetMonthlySummaryAsync(_clientId, month.Year, month.Month);
+                lblRemaining.Text = $"Remaining walks this month: {summary.Remaining} / {summary.MaxWalksPerMonth} ({summary.PlanDescription})";
+            }
+            catch { /* best-effort display */ }
         };
 
         tabMyWalks.Controls.Add(_calClient);

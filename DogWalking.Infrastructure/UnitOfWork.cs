@@ -20,7 +20,7 @@ public class UnitOfWork : IUnitOfWork
     public IDogRepository Dogs { get; }
     public IWalkEventRepository WalkEvents { get; }
     public IWalkerAvailabilityRepository WalkerAvailabilities { get; }
-    public IWalkerWorkingAreaRepository  WalkerWorkingAreas   { get; }
+    public IWalkerWorkingAreaRepository WalkerWorkingAreas { get; }
 
     public UnitOfWork(DogWalkingDbContext ctx)
     {
@@ -30,7 +30,7 @@ public class UnitOfWork : IUnitOfWork
         Dogs = new DogRepository(ctx);
         WalkEvents = new WalkEventRepository(ctx);
         WalkerAvailabilities = new WalkerAvailabilityRepository(ctx);
-        WalkerWorkingAreas   = new WalkerWorkingAreaRepository(ctx);
+        WalkerWorkingAreas = new WalkerWorkingAreaRepository(ctx);
     }
 
     public async Task<int> CommitAsync(CancellationToken ct = default)

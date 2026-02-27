@@ -38,4 +38,7 @@ public interface IWalkEventService
 
     /// <summary>Walker releases an accepted walk, returning it to Requested status.</summary>
     Task<WalkEventDto> UnacceptWalkAsync(int walkEventId, string? note = null, CancellationToken ct = default);
+
+    /// <summary>Returns active walk count vs subscription limit for the given month.</summary>
+    Task<MonthlyWalkSummaryDto> GetMonthlySummaryAsync(int clientId, int year, int month, CancellationToken ct = default);
 }

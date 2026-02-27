@@ -5,6 +5,8 @@ using DogWalking.Application.Validators;
 using DogWalking.Domain.Enums;
 using DogWalking.Domain.Interfaces;
 using DogWalking.Infrastructure.Data;
+using DogWalking.Infrastructure.Messaging;
+
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,9 @@ public static class ServiceCollectionExtensions
 
         services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
 
+        // LAN notification service (singleton — one listener for the app lifetime)
+        services.AddSingleton<INotificationService, UdpNotificationService>();
+
         return services;
     }
 
@@ -48,7 +53,7 @@ public static class ServiceCollectionExtensions
         await auth.CreateUserAsync(new CreateUserDto(
             "admin", "admin123", "System Administrator", UserRole.Admin));
 
-        // Seed a default client for demo (must use RegisterClientUserAsync to create Client entity)
+        // Seed a default client for demo
         await auth.RegisterClientUserAsync(new RegisterClientUserDto(
             "nata", "natafridman", "Nataniel Fridman",
             "+1234567890", "nata@test.com", SubscriptionType.Basic, "123 Demo Street", "natafridman"));

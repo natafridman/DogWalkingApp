@@ -19,13 +19,16 @@ public class WalkEventService : IWalkEventService
     private readonly IUnitOfWork _uow;
     private readonly ILogger<WalkEventService> _log;
     private readonly IValidator<CreateWalkEventDto> _walkValidator;
+    private readonly INotificationService? _notifier;
 
     public WalkEventService(IUnitOfWork uow, ILogger<WalkEventService> log,
-                            IValidator<CreateWalkEventDto> walkValidator)
+                            IValidator<CreateWalkEventDto> walkValidator,
+                            INotificationService? notifier = null)
     {
         _uow = uow;
         _log = log;
         _walkValidator = walkValidator;
+        _notifier = notifier;
     }
 
     public async Task<IEnumerable<WalkEventDto>> GetByDogIdAsync(int dogId, CancellationToken ct = default)
@@ -104,6 +107,13 @@ public class WalkEventService : IWalkEventService
 
         _uow.WalkEvents.Update(walk);
         await _uow.CommitAsync(ct);
+
+        await NotifyAsync(new WalkNotification(
+            NotificationType.WalkClaimed, walkerId, walk.Id,
+            walk.Dog?.ClientId, walkerId,
+            walk.Dog?.Name ?? "", walk.Location, walk.WalkDate,
+            $"{walker.FullName} claimed the walk for {walk.Dog?.Name ?? "a dog"}"), ct);
+
         return MapToDto(walk);
     }
 
@@ -225,6 +235,17 @@ public class WalkEventService : IWalkEventService
 
         _uow.WalkEvents.Update(walk);
         await _uow.CommitAsync(ct);
+
+        if (dto.Accepted)
+        {
+            var dogName = walk.Dog?.Name ?? "";
+            await NotifyAsync(new WalkNotification(
+                NotificationType.WalkAccepted, dto.WalkerId, walk.Id,
+                walk.Dog?.ClientId, dto.WalkerId,
+                dogName, walk.Location, walk.WalkDate,
+                $"Walk for {dogName} was accepted"), ct);
+        }
+
         return MapToDto(walk);
     }
 
@@ -309,6 +330,28 @@ public class WalkEventService : IWalkEventService
         _uow.WalkEvents.Update(walk);
         await _uow.CommitAsync(ct);
         return MapToDto(walk);
+    }
+
+    public async Task<MonthlyWalkSummaryDto> GetMonthlySummaryAsync(
+        int clientId, int year, int month, CancellationToken ct = default)
+    {
+        var client = await _uow.Clients.GetByIdAsync(clientId, ct)
+            ?? throw new KeyNotFoundException($"Client {clientId} not found.");
+
+        var walks = await _uow.WalkEvents.GetByClientAndMonthAsync(clientId, year, month, ct);
+        var strategy = WalkLimitStrategyFactory.Create(client.Subscription);
+
+        int active = walks.Count(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
+                                                or WalkStatus.Accepted  or WalkStatus.InProgress);
+        int remaining = Math.Max(0, strategy.MaxWalksPerMonth - active);
+        return new MonthlyWalkSummaryDto(active, strategy.MaxWalksPerMonth, remaining, strategy.Description);
+    }
+
+    private async Task NotifyAsync(WalkNotification notification, CancellationToken ct)
+    {
+        if (_notifier is null) return;
+        try { await _notifier.PublishAsync(notification, ct); }
+        catch { /* Notifications are best-effort */ }
     }
 
     private static WalkEventDto MapToDto(WalkEvent w, Dog? dog = null) => new(
