@@ -12,13 +12,14 @@ namespace DogWalking.WinForms;
 /// Application entry point. Loads configuration from appsettings.json,
 /// sets up the DI container, applies migrations, starts the LAN notification
 /// listener, and launches the login form.
+/// Main must be synchronous to preserve STA thread affinity required by OLE controls.
 /// </summary>
 static class Program
 {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
     [STAThread]
-    static async Task Main()
+    static void Main()
     {
         ApplicationConfiguration.Initialize();
 
@@ -45,15 +46,21 @@ static class Program
 
         ServiceProvider = services.BuildServiceProvider();
 
-        await ServiceProvider.InitializeDatabaseAsync();
+        ServiceProvider.InitializeDatabaseAsync()
+            .GetAwaiter()
+            .GetResult();
 
         // Start LAN notification listener
         var notifier = ServiceProvider.GetRequiredService<INotificationService>();
-        await notifier.StartAsync();
+        notifier.StartAsync()
+            .GetAwaiter()
+            .GetResult();
 
         App.Run(ServiceProvider.GetRequiredService<LoginForm>());
 
         // Clean shutdown
-        await notifier.StopAsync();
+        notifier.StopAsync()
+            .GetAwaiter()
+            .GetResult();
     }
 }

@@ -35,6 +35,11 @@ public partial class MainForm : Form
     private readonly IServiceScope           _scope;
     private readonly CancellationTokenSource _cts = new();
 
+    // Serialises all DB operations through the single scoped DbContext.
+    // EF Core's DbContext is NOT thread-safe; WinForms re-entrant events
+    // (e.g. Tab.Enter firing twice) would otherwise cause concurrent access.
+    private readonly SemaphoreSlim _dbLock = new(1, 1);
+
     // Walker calendar (created at runtime)
     private WalkCalendarPanel _calWalker = null!;
     private IEnumerable<WalkerAvailabilityDto> _cachedAvailability = [];
@@ -238,6 +243,7 @@ public partial class MainForm : Form
 
     private async Task LoadClientsAsync(string search = "")
     {
+        if (!await _dbLock.WaitAsync(0)) return;
         try
         {
             var list = string.IsNullOrWhiteSpace(search)
@@ -253,10 +259,12 @@ public partial class MainForm : Form
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }
+        finally { _dbLock.Release(); }
     }
 
     private async Task LoadWalksAsync()
     {
+        if (!await _dbLock.WaitAsync(0)) return;
         try
         {
             var status = Enum.Parse<WalkStatus>(cmbWalkStatus.SelectedItem!.ToString()!);
@@ -279,6 +287,7 @@ public partial class MainForm : Form
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }
+        finally { _dbLock.Release(); }
     }
 
     private Task LoadWalkersAsync() => RunAsync(async () =>
@@ -589,6 +598,7 @@ public partial class MainForm : Form
 
     private async Task LoadMyDogsAsync()
     {
+        if (!await _dbLock.WaitAsync(0)) return;
         try
         {
             var list  = await _dogSvc.GetByClientIdAsync(_clientId, _cts.Token);
@@ -614,6 +624,7 @@ public partial class MainForm : Form
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }
+        finally { _dbLock.Release(); }
     }
 
     private async Task ShowMyDogDialogAsync(int? dogId = null)
@@ -688,12 +699,14 @@ public partial class MainForm : Form
 
         _calClient.WalksLoaded += async (month, _) =>
         {
+            if (!await _dbLock.WaitAsync(0)) return;
             try
             {
                 var summary = await _walks.GetMonthlySummaryAsync(_clientId, month.Year, month.Month);
                 lblRemaining.Text = $"Remaining walks this month: {summary.Remaining} / {summary.MaxWalksPerMonth} ({summary.PlanDescription})";
             }
             catch { /* best-effort display */ }
+            finally { _dbLock.Release(); }
         };
 
         tabMyWalks.Controls.Add(_calClient);
@@ -1136,7 +1149,12 @@ public partial class MainForm : Form
     /// </summary>
     private async Task RunAsync(Func<Task> action)
     {
-        var result = await action().ToResultAsync();
-        if (!result.IsSuccess) ShowError(result.Error!);
+        if (!await _dbLock.WaitAsync(0)) return; // skip if already loading
+        try
+        {
+            var result = await action().ToResultAsync();
+            if (!result.IsSuccess) ShowError(result.Error!);
+        }
+        finally { _dbLock.Release(); }
     }
 }

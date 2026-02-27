@@ -25,8 +25,10 @@ public record CreateWalkEventDto(
     DateTime       WalkDate,
     int            DurationMinutes,
     string         Location,
-    string?        Notes          = null,
-    RecurrenceType RecurrenceType = RecurrenceType.OneTime
+    string?        Notes                    = null,
+    RecurrenceType RecurrenceType           = RecurrenceType.OneTime,
+    bool           BypassSubscriptionLimits = false,
+    int?           PreferredWalkerId        = null
 );
 
 /// <summary>Admin/system proposes a specific walker for a walk request.</summary>

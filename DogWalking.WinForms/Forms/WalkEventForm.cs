@@ -19,9 +19,11 @@ public partial class WalkEventForm : Form
     private readonly IWalkEventService _walkSvc;
     private readonly IClientService    _clientSvc;
     private readonly IDogService       _dogSvc;
+    private readonly IUserService      _userSvc;
 
     private IReadOnlyList<ClientDto> _clientList = [];
     private List<DogDto>             _dogList    = [];
+    private List<UserDto>            _walkerList = [];
     private int? _lockedClientId;
     private DateTime? _preSelectedDate;
 
@@ -34,6 +36,7 @@ public partial class WalkEventForm : Form
         _walkSvc   = sp.GetRequiredService<IWalkEventService>();
         _clientSvc = sp.GetRequiredService<IClientService>();
         _dogSvc    = sp.GetRequiredService<IDogService>();
+        _userSvc   = sp.GetRequiredService<IUserService>();
         InitializeComponent();
         PopulateCombos();
     }
@@ -123,6 +126,14 @@ public partial class WalkEventForm : Form
                 PreSelectZone(client?.Zone);
             }
 
+            // Load walkers for the preferred-walker combo
+            _walkerList = (await _userSvc.GetWalkersAsync()).ToList();
+            cmbWalker.Items.Clear();
+            cmbWalker.Items.Add("(No preference)");
+            foreach (var w in _walkerList)
+                cmbWalker.Items.Add($"{w.Username} — {w.FullName}");
+            cmbWalker.SelectedIndex = 0;
+
             // Apply pre-selected date (set via PreSelectDate() after constructor)
             if (_preSelectedDate.HasValue)
                 dtpWalkDate.Value = _preSelectedDate.Value.Date.AddHours(9);
@@ -208,16 +219,27 @@ public partial class WalkEventForm : Form
             var duration   = (int)numDuration.Value;
             var location   = cmbLocation.SelectedItem?.ToString() ?? "";
             var notes      = string.IsNullOrWhiteSpace(txtNotes.Text) ? null : txtNotes.Text;
+            bool isAdmin   = !_lockedClientId.HasValue;
+
+            // Resolve preferred walker (index 0 = no preference)
+            int? preferredWalkerId = null;
+            if (cmbWalker.SelectedIndex > 0)
+                preferredWalkerId = _walkerList[cmbWalker.SelectedIndex - 1].Id;
 
             foreach (var dog in selectedDogs)
             {
                 await _walkSvc.ScheduleAsync(new CreateWalkEventDto(
-                    dog.Id, walkDate, duration, location, notes, recurrence));
+                    dog.Id, walkDate, duration, location, notes, recurrence,
+                    BypassSubscriptionLimits: isAdmin,
+                    PreferredWalkerId: preferredWalkerId));
             }
 
+            string walkerNote = preferredWalkerId.HasValue
+                ? " A proposal has been sent to the selected walker."
+                : " A walker will be assigned shortly.";
             string msg = recurrence == RecurrenceType.OneTime
-                ? $"Walk request submitted for {selectedDogs.Count} dog(s)! A walker will be assigned shortly."
-                : $"Recurring walk requests submitted for {selectedDogs.Count} dog(s) for the rest of the month.";
+                ? $"Walk request submitted for {selectedDogs.Count} dog(s)!{walkerNote}"
+                : $"Recurring walk requests submitted for {selectedDogs.Count} dog(s) for the rest of the month.{walkerNote}";
 
             MessageBox.Show(msg, "Request Submitted", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
@@ -245,6 +267,7 @@ public partial class WalkEventForm : Form
     {
         for (int i = 0; i < clbDogs.Items.Count; i++)
             clbDogs.SetItemChecked(i, false);
+        cmbWalker.SelectedIndex = 0;
         cmbLocation.SelectedIndex = 0;
         dtpWalkDate.Value = DateTime.Now.Date.AddDays(1).AddHours(9);
         numDuration.Value = 60;
