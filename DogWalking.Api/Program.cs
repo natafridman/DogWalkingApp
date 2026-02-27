@@ -6,10 +6,9 @@ using FluentValidation;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Domain + Infrastructure services
-var conn = builder.Configuration.GetConnectionString("Default")
-    ?? throw new InvalidOperationException("Missing 'Default' connection string.");
-
-builder.Services.AddDogWalkingServices(conn);
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddServices();
+builder.Services.AddCaching();
 
 // ── JWT authentication
 builder.Services.AddJwtAuthentication(builder.Configuration);
