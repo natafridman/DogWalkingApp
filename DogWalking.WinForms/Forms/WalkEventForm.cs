@@ -240,5 +240,18 @@ public partial class WalkEventForm : Form
 
     private async void CmbClient_SelectedIndexChanged(object? sender, EventArgs e) => await OnClientChangedAsync();
     private async void BtnSave_Click(object? sender, EventArgs e) => await SaveAsync();
+
+    private void BtnClear_Click(object? sender, EventArgs e)
+    {
+        for (int i = 0; i < clbDogs.Items.Count; i++)
+            clbDogs.SetItemChecked(i, false);
+        cmbLocation.SelectedIndex = 0;
+        dtpWalkDate.Value = DateTime.Now.Date.AddDays(1).AddHours(9);
+        numDuration.Value = 60;
+        cmbRecurrence.SelectedIndex = 0;
+        txtNotes.Clear();
+        lblError.Visible = false;
+    }
+
     private void BtnCancel_Click(object? sender, EventArgs e) { DialogResult = DialogResult.Cancel; Close(); }
 }

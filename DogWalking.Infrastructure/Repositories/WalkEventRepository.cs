@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure.Repositories;
 
+/// <summary>
+/// EF Core implementation of IWalkEventRepository.
+/// Supports server-side pagination and text search for the admin dashboard.
+/// </summary>
 public class WalkEventRepository : IWalkEventRepository
 {
     private readonly DogWalkingDbContext _ctx;
@@ -77,20 +81,30 @@ public class WalkEventRepository : IWalkEventRepository
             .CountAsync(ct);
 
     /// <summary>
-    /// Server-side pagination with total count — avoids loading all rows into memory.
+    /// Server-side pagination with optional text search — avoids loading all rows into memory.
     /// </summary>
     public async Task<(IEnumerable<WalkEvent> Items, int TotalCount)> GetByStatusPagedAsync(
-        WalkStatus status, int page, int pageSize, CancellationToken ct = default)
+        WalkStatus status, int page, int pageSize, string? search = null,
+        CancellationToken ct = default)
     {
-        var query = _ctx.WalkEvents
+        IQueryable<WalkEvent> query = _ctx.WalkEvents
             .AsNoTracking()
             .Where(w => w.Status == status)
             .Include(w => w.Dog).ThenInclude(d => d.Client)
-            .Include(w => w.Walker)
-            .OrderBy(w => w.WalkDate);
+            .Include(w => w.Walker);
 
-        var total = await query.CountAsync(ct);
-        var items = await query
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(w =>
+                EF.Functions.Like(w.Dog.Name, $"%{search}%") ||
+                EF.Functions.Like(w.Dog.Client.Name, $"%{search}%") ||
+                EF.Functions.Like(w.Location, $"%{search}%") ||
+                (w.Walker != null && EF.Functions.Like(w.Walker.FullName, $"%{search}%")));
+        }
+
+        var ordered = query.OrderBy(w => w.WalkDate);
+        var total = await ordered.CountAsync(ct);
+        var items = await ordered
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);

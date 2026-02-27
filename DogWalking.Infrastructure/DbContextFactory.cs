@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace DogWalking.Infrastructure;
 
+/// <summary>
+/// Design-time factory used by EF Core tooling (dotnet ef migrations).
+/// Not used at runtime — the app uses DI-configured DbContext instead.
+/// </summary>
 public class DbContextFactory : IDesignTimeDbContextFactory<DogWalkingDbContext>
 {
     public DogWalkingDbContext CreateDbContext(string[] args)

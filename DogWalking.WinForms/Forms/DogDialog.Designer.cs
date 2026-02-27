@@ -78,16 +78,25 @@ partial class DogDialog
         btnSave.ForeColor = Color.White;
         btnSave.Location = new Point(20, 225);
         btnSave.Name = "btnSave";
-        btnSave.Size = new Size(130, 28);
+        btnSave.Size = new Size(95, 28);
         btnSave.Text = "Save";
         btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
 
+        // btnClear
+        btnClear = new Button();
+        btnClear.FlatStyle = FlatStyle.Flat;
+        btnClear.Location = new Point(125, 225);
+        btnClear.Name = "btnClear";
+        btnClear.Size = new Size(85, 28);
+        btnClear.Text = "Clear";
+        btnClear.Click += BtnClear_Click;
+
         // btnCancel
         btnCancel.FlatStyle = FlatStyle.Flat;
-        btnCancel.Location = new Point(170, 225);
+        btnCancel.Location = new Point(220, 225);
         btnCancel.Name = "btnCancel";
-        btnCancel.Size = new Size(130, 28);
+        btnCancel.Size = new Size(95, 28);
         btnCancel.Text = "Cancel";
         btnCancel.Click += BtnCancel_Click;
 
@@ -104,6 +113,7 @@ partial class DogDialog
         Controls.Add(dtpBirthDate);
         Controls.Add(lblError);
         Controls.Add(btnSave);
+        Controls.Add(btnClear);
         Controls.Add(btnCancel);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -125,5 +135,6 @@ partial class DogDialog
     private DateTimePicker dtpBirthDate;
     private Label lblError;
     private Button btnSave;
+    private Button btnClear;
     private Button btnCancel;
 }

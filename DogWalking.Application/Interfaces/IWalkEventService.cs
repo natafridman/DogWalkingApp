@@ -42,6 +42,6 @@ public interface IWalkEventService
     /// <summary>Returns active walk count vs subscription limit for the given month.</summary>
     Task<MonthlyWalkSummaryDto> GetMonthlySummaryAsync(int clientId, int year, int month, CancellationToken ct = default);
 
-    /// <summary>Server-side paginated walk listing for admin UI.</summary>
-    Task<PagedResultDto<WalkEventDto>> GetByStatusPagedAsync(WalkStatus status, int page, int pageSize, CancellationToken ct = default);
+    /// <summary>Server-side paginated walk listing for admin UI, with optional text search.</summary>
+    Task<PagedResultDto<WalkEventDto>> GetByStatusPagedAsync(WalkStatus status, int page, int pageSize, string? search = null, CancellationToken ct = default);
 }

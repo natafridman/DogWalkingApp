@@ -187,6 +187,9 @@ public partial class MainForm : Form
     private async void BtnRefreshClients_Click(object? sender, EventArgs e)
         => await LoadClientsAsync();
 
+    private async void TxtSearchWalks_TextChanged(object? sender, EventArgs e)
+    { _walksPage = 1; await LoadWalksAsync(); }
+
     private async void CmbWalkStatus_SelectedIndexChanged(object? sender, EventArgs e)
     { _walksPage = 1; await LoadWalksAsync(); }
 
@@ -258,13 +261,14 @@ public partial class MainForm : Form
         try
         {
             var status = Enum.Parse<WalkStatus>(cmbWalkStatus.SelectedItem!.ToString()!);
-            var paged  = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, _cts.Token);
+            var search = string.IsNullOrWhiteSpace(txtSearchWalks.Text) ? null : txtSearchWalks.Text.Trim();
+            var paged  = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, search, _cts.Token);
 
             // Clamp page if it overshoots (e.g. after deleting the last item on a page)
             if (_walksPage > paged.TotalPages && paged.TotalPages > 0)
             {
                 _walksPage = paged.TotalPages;
-                paged = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, _cts.Token);
+                paged = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, search, _cts.Token);
             }
 
             dgvWalks.DataSource = WalkRows(paged.Items);

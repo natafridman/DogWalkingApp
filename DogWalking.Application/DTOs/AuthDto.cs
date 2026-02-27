@@ -2,8 +2,10 @@ using DogWalking.Domain.Enums;
 
 namespace DogWalking.Application.DTOs;
 
+/// <summary>Credentials submitted by the user at login.</summary>
 public record LoginDto(string Username, string Password);
 
+/// <summary>Result of a login attempt — contains user info on success, error message on failure.</summary>
 public record AuthResultDto(
     bool Success,
     string? ErrorMessage,

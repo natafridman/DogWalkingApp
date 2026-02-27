@@ -3,6 +3,7 @@ using FluentValidation;
 
 namespace DogWalking.Application.Validators;
 
+/// <summary>Validates walk requests: future date, valid dog, duration between 15–480 min.</summary>
 public sealed class CreateWalkEventDtoValidator : AbstractValidator<CreateWalkEventDto>
 {
     public CreateWalkEventDtoValidator()

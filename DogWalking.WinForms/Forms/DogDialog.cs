@@ -84,6 +84,14 @@ public sealed partial class DogDialog : Form
 
     private async void BtnSave_Click(object? sender, EventArgs e) => await SaveAsync();
 
+    private void BtnClear_Click(object? sender, EventArgs e)
+    {
+        txtName.Clear();
+        cmbBreed.SelectedIndex = 0;
+        dtpBirthDate.Value = DateTime.Today.AddYears(-1);
+        lblError.Visible = false;
+    }
+
     private void BtnCancel_Click(object? sender, EventArgs e)
     {
         DialogResult = DialogResult.Cancel;

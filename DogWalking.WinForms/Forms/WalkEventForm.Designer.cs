@@ -180,9 +180,9 @@ partial class WalkEventForm
         lblError.Size = new Size(453, 48);
         lblError.TabIndex = 15;
         lblError.Visible = false;
-        // 
+        //
         // btnSave
-        // 
+        //
         btnSave.BackColor = Color.FromArgb(30, 70, 150);
         btnSave.FlatStyle = FlatStyle.Flat;
         btnSave.Font = new Font("Segoe UI", 10F);
@@ -190,20 +190,33 @@ partial class WalkEventForm
         btnSave.Location = new Point(20, 772);
         btnSave.Margin = new Padding(3, 4, 3, 4);
         btnSave.Name = "btnSave";
-        btnSave.Size = new Size(211, 43);
+        btnSave.Size = new Size(185, 43);
         btnSave.TabIndex = 16;
         btnSave.Text = "Submit Walk Request";
         btnSave.UseVisualStyleBackColor = false;
         btnSave.Click += BtnSave_Click;
-        // 
+        //
+        // btnClear
+        //
+        btnClear = new Button();
+        btnClear.FlatStyle = FlatStyle.Flat;
+        btnClear.Font = new Font("Segoe UI", 10F);
+        btnClear.Location = new Point(215, 772);
+        btnClear.Margin = new Padding(3, 4, 3, 4);
+        btnClear.Name = "btnClear";
+        btnClear.Size = new Size(110, 43);
+        btnClear.TabIndex = 17;
+        btnClear.Text = "Clear";
+        btnClear.Click += BtnClear_Click;
+        //
         // btnCancel
-        // 
+        //
         btnCancel.FlatStyle = FlatStyle.Flat;
-        btnCancel.Location = new Point(250, 772);
+        btnCancel.Location = new Point(335, 772);
         btnCancel.Margin = new Padding(3, 4, 3, 4);
         btnCancel.Name = "btnCancel";
-        btnCancel.Size = new Size(211, 43);
-        btnCancel.TabIndex = 17;
+        btnCancel.Size = new Size(130, 43);
+        btnCancel.TabIndex = 18;
         btnCancel.Text = "Cancel";
         btnCancel.Click += BtnCancel_Click;
         // 
@@ -231,6 +244,7 @@ partial class WalkEventForm
         Controls.Add(cmbRecurrence);
         Controls.Add(lblError);
         Controls.Add(btnSave);
+        Controls.Add(btnClear);
         Controls.Add(btnCancel);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         Margin = new Padding(3, 4, 3, 4);
@@ -262,5 +276,6 @@ partial class WalkEventForm
     private ComboBox cmbRecurrence;
     private Label lblError;
     private Button btnSave;
+    private Button btnClear;
     private Button btnCancel;
 }

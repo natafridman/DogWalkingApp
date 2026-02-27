@@ -2,6 +2,9 @@ using DogWalking.Domain.Entities;
 
 namespace DogWalking.Domain.Interfaces;
 
+/// <summary>
+/// Persistence contract for the zones where a walker operates.
+/// </summary>
 public interface IWalkerWorkingAreaRepository
 {
     Task<WalkerWorkingArea?>             GetByIdAsync(int id, CancellationToken ct = default);

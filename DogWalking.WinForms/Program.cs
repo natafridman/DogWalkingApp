@@ -7,6 +7,10 @@ using App = System.Windows.Forms.Application;
 
 namespace DogWalking.WinForms;
 
+/// <summary>
+/// Application entry point. Sets up the DI container, applies migrations,
+/// starts the LAN notification listener, and launches the login form.
+/// </summary>
 static class Program
 {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;

@@ -6,6 +6,10 @@ using DogWalking.Domain.Interfaces;
 
 namespace DogWalking.Application.Services;
 
+/// <summary>
+/// CRUD operations for dogs. Validates that the owner (client) exists
+/// before creating, and cascade-deletes walk events on dog removal.
+/// </summary>
 public class DogService : IDogService
 {
     private readonly IUnitOfWork _uow;

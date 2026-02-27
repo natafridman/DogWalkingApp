@@ -27,10 +27,12 @@ public interface IWalkEventRepository
                                                CancellationToken ct = default);
 
     /// <summary>
-    /// Returns a paged subset of walks filtered by status, with total count for UI pagination.
+    /// Returns a paged subset of walks filtered by status and optional search term,
+    /// with total count for UI pagination.
     /// </summary>
     Task<(IEnumerable<WalkEvent> Items, int TotalCount)> GetByStatusPagedAsync(
-        WalkStatus status, int page, int pageSize, CancellationToken ct = default);
+        WalkStatus status, int page, int pageSize, string? search = null,
+        CancellationToken ct = default);
 
     Task AddAsync(WalkEvent walkEvent, CancellationToken ct = default);
     Task AddRangeAsync(IEnumerable<WalkEvent> walkEvents, CancellationToken ct = default);

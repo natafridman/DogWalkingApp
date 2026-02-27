@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure.Repositories;
 
+/// <summary>
+/// EF Core implementation of IWalkerWorkingAreaRepository.
+/// Zones define which neighbourhoods a walker can serve.
+/// </summary>
 public class WalkerWorkingAreaRepository : IWalkerWorkingAreaRepository
 {
     private readonly DogWalkingDbContext _ctx;

@@ -343,9 +343,10 @@ public class WalkEventService : IWalkEventService
     }
 
     public async Task<PagedResultDto<WalkEventDto>> GetByStatusPagedAsync(
-        WalkStatus status, int page, int pageSize, CancellationToken ct = default)
+        WalkStatus status, int page, int pageSize, string? search = null,
+        CancellationToken ct = default)
     {
-        var (items, total) = await _uow.WalkEvents.GetByStatusPagedAsync(status, page, pageSize, ct);
+        var (items, total) = await _uow.WalkEvents.GetByStatusPagedAsync(status, page, pageSize, search, ct);
         return new PagedResultDto<WalkEventDto>(
             items.Select(w => MapToDto(w)).ToList(),
             total, page, pageSize);

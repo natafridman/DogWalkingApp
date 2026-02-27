@@ -135,7 +135,7 @@ partial class MainForm
         // txtSearchClients
         txtSearchClients.Location = new Point(0, 7);
         txtSearchClients.Name = "txtSearchClients";
-        txtSearchClients.PlaceholderText = "Search name or email\u2026";
+        txtSearchClients.PlaceholderText = "Search client, dog name, breed\u2026";
         txtSearchClients.Size = new Size(300, 23);
         txtSearchClients.TextChanged += TxtSearchClients_TextChanged;
 
@@ -182,6 +182,7 @@ partial class MainForm
 
         // pnlWalksToolbar
         pnlWalksToolbar.Controls.Add(cmbWalkStatus);
+        pnlWalksToolbar.Controls.Add(txtSearchWalks);
         pnlWalksToolbar.Controls.Add(btnNewWalk);
         pnlWalksToolbar.Controls.Add(btnWalksPrev);
         pnlWalksToolbar.Controls.Add(lblWalksPage);
@@ -197,13 +198,21 @@ partial class MainForm
         cmbWalkStatus.Size = new Size(160, 23);
         cmbWalkStatus.SelectedIndexChanged += CmbWalkStatus_SelectedIndexChanged;
 
+        // txtSearchWalks
+        txtSearchWalks = new TextBox();
+        txtSearchWalks.Location = new Point(170, 7);
+        txtSearchWalks.Name = "txtSearchWalks";
+        txtSearchWalks.PlaceholderText = "Search dog, client, walker\u2026";
+        txtSearchWalks.Size = new Size(220, 23);
+        txtSearchWalks.TextChanged += TxtSearchWalks_TextChanged;
+
         // btnNewWalk
         btnNewWalk.AutoSize = true;
         btnNewWalk.BackColor = Color.FromArgb(30, 70, 150);
         btnNewWalk.FlatStyle = FlatStyle.Flat;
         btnNewWalk.Font = new Font("Segoe UI", 9F);
         btnNewWalk.ForeColor = Color.White;
-        btnNewWalk.Location = new Point(180, 5);
+        btnNewWalk.Location = new Point(400, 5);
         btnNewWalk.Name = "btnNewWalk";
         btnNewWalk.Size = new Size(100, 28);
         btnNewWalk.Text = "+ New Walk";
@@ -216,7 +225,7 @@ partial class MainForm
         btnWalksPrev.FlatStyle = FlatStyle.Flat;
         btnWalksPrev.Font = new Font("Segoe UI", 9F);
         btnWalksPrev.ForeColor = Color.White;
-        btnWalksPrev.Location = new Point(310, 5);
+        btnWalksPrev.Location = new Point(530, 5);
         btnWalksPrev.Name = "btnWalksPrev";
         btnWalksPrev.Size = new Size(32, 28);
         btnWalksPrev.Text = "\u25c0";
@@ -227,7 +236,7 @@ partial class MainForm
         lblWalksPage = new Label();
         lblWalksPage.AutoSize = true;
         lblWalksPage.Font = new Font("Segoe UI", 9F);
-        lblWalksPage.Location = new Point(350, 9);
+        lblWalksPage.Location = new Point(570, 9);
         lblWalksPage.Name = "lblWalksPage";
         lblWalksPage.Text = "Page 1 of 1";
 
@@ -237,7 +246,7 @@ partial class MainForm
         btnWalksNext.FlatStyle = FlatStyle.Flat;
         btnWalksNext.Font = new Font("Segoe UI", 9F);
         btnWalksNext.ForeColor = Color.White;
-        btnWalksNext.Location = new Point(460, 5);
+        btnWalksNext.Location = new Point(700, 5);
         btnWalksNext.Name = "btnWalksNext";
         btnWalksNext.Size = new Size(32, 28);
         btnWalksNext.Text = "\u25b6";
@@ -430,6 +439,7 @@ partial class MainForm
     private TabPage tabWalks;
     private Panel pnlWalksToolbar;
     private ComboBox cmbWalkStatus;
+    private TextBox txtSearchWalks;
     private Button btnNewWalk;
     private Button btnWalksPrev;
     private Label lblWalksPage;

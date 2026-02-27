@@ -2,6 +2,9 @@ using DogWalking.Domain.Entities;
 
 namespace DogWalking.Domain.Interfaces;
 
+/// <summary>
+/// Persistence contract for User (authentication and profile data).
+/// </summary>
 public interface IUserRepository
 {
     Task<User?>             GetByIdAsync(int id, CancellationToken ct = default);

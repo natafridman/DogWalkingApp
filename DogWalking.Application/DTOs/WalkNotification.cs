@@ -1,5 +1,6 @@
 namespace DogWalking.Application.DTOs;
 
+/// <summary>Categories of walk lifecycle events sent over the notification channel.</summary>
 public enum NotificationType
 {
     WalkRequested  = 1,
@@ -11,6 +12,7 @@ public enum NotificationType
     WalkCancelled  = 7
 }
 
+/// <summary>Payload broadcast over UDP when a walk event changes state.</summary>
 public record WalkNotification(
     NotificationType Type,
     int    SenderUserId,

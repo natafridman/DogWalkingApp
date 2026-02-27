@@ -62,7 +62,9 @@ public class ClientRepository : IClientRepository
             .AsNoTracking()
             .Where(c => c.IsActive &&
                         (EF.Functions.Like(c.Name, $"%{term}%") ||
-                         EF.Functions.Like(c.Email, $"%{term}%")))
+                         EF.Functions.Like(c.Email, $"%{term}%") ||
+                         c.Dogs.Any(d => EF.Functions.Like(d.Name, $"%{term}%") ||
+                                         EF.Functions.Like(d.Breed, $"%{term}%"))))
             .Include(c => c.Dogs)
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
