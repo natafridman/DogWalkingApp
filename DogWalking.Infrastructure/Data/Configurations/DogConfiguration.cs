@@ -16,5 +16,10 @@ public class DogConfiguration : IEntityTypeConfiguration<Dog>
         builder.Property(d => d.BirthDate).IsRequired();
         builder.Property(d => d.CreatedAt).IsRequired();
         builder.Ignore(d => d.AgeInYears);
+
+        builder.HasMany(d => d.WalkEvents)
+               .WithOne(w => w.Dog)
+               .HasForeignKey(w => w.DogId)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }
