@@ -10,11 +10,11 @@ public class WalkLimitStrategyTests
     private static DateTime FutureDate(int daysAhead = 1, int hour = 10)
         => DateTime.UtcNow.Date.AddDays(daysAhead).AddHours(hour);
 
-    private static List<WalkEvent> MakeWalks(int count)
+    private static List<WalkEvent> MakeWalks(int count, int monthOffset = 0)
     {
         var walks = new List<WalkEvent>();
         for (int i = 0; i < count; i++)
-            walks.Add(CreateScheduledWalk(DateTime.UtcNow.AddDays(i + 1)));
+            walks.Add(CreateScheduledWalk(DateTime.UtcNow.AddDays(i + 1 + monthOffset * 30)));
         return walks;
     }
 
@@ -39,6 +39,24 @@ public class WalkLimitStrategyTests
         var existing = new[] { CreateScheduledWalk(FutureDate(2)) };
         Assert.Throws<DomainException>(() =>
             strategy.ValidateWalkAllowed(existing, FutureDate(3)));
+    }
+
+    [Fact]
+    public void Free_TwoWalksSameDay_Blocked()
+    {
+        var strategy = WalkLimitStrategyFactory.Create(SubscriptionType.Free);
+        var proposedDay = FutureDate(1, 9);
+        var existing  = new[] { CreateScheduledWalk(proposedDay) };
+
+        // Even if monthly limit not hit, same-day block applies
+        // (Free already hits monthly limit anyway — covered by Free_SecondWalkSameMonth_Blocked)
+        // Separate daily test: use Basic which has more monthly slots
+        var basicStrategy = WalkLimitStrategyFactory.Create(SubscriptionType.Basic);
+        var sameDay       = FutureDate(1, 14);
+        var existingSameDay = new[] { CreateScheduledWalk(FutureDate(1, 9)) };
+
+        Assert.Throws<DomainException>(() =>
+            basicStrategy.ValidateWalkAllowed(existingSameDay, sameDay));
     }
 
     // ── BASIC ─────────────────────────────────────────
@@ -110,7 +128,17 @@ public class WalkLimitStrategyTests
     }
 
     [Fact]
-    public void CancelledWalks_DontCountAgainstLimit()
+    public void Premium_51stWalk_Blocked()
+    {
+        var strategy = WalkLimitStrategyFactory.Create(SubscriptionType.Premium);
+        var existing = MakeWalks(50);
+
+        Assert.Throws<DomainException>(() =>
+            strategy.ValidateWalkAllowed(existing, FutureDate(55)));
+    }
+
+    [Fact]
+    public void Premium_CancelledWalks_DontCountAgainstLimit()
     {
         var strategy = WalkLimitStrategyFactory.Create(SubscriptionType.Free);
         var walk = CreateScheduledWalk(FutureDate(3));

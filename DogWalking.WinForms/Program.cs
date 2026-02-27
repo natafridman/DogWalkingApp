@@ -22,6 +22,8 @@ static class Program
         // WinForms — Transient so each form is a fresh instance
         services.AddTransient<LoginForm>();
         services.AddTransient<MainForm>();
+        services.AddTransient<ClientForm>();
+        services.AddTransient<DogForm>();
         services.AddTransient<DogDialog>();
         services.AddTransient<WalkEventForm>();
 

@@ -1,9 +1,8 @@
 using DogWalking.Application.DTOs;
 using DogWalking.Application.Interfaces;
 using DogWalking.Domain.Enums;
-
+using DogWalking.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data;
 
 namespace DogWalking.WinForms.Forms;
 
@@ -37,11 +36,8 @@ public partial class LoginForm : Form
 
     private void PopulateSubscriptions()
     {
-        cmbSub.Items.Add("Free");
-        cmbSub.Items.Add("Basic");
-        cmbSub.Items.Add("Pro");
-        cmbSub.Items.Add("Premium");
-
+        foreach (var s in WalkLimitStrategyFactory.GetAll())
+            cmbSub.Items.Add(s.Description);
         cmbSub.SelectedIndex = 0;
     }
 

@@ -52,8 +52,13 @@ public class DogService : IDogService
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        var dog = await _uow.Dogs.GetByIdAsync(id, ct)
+        var dog = await _uow.Dogs.GetByIdWithWalksAsync(id, ct)
             ?? throw new KeyNotFoundException($"Dog {id} not found.");
+
+        // Cascade-delete all associated walk events before removing the dog
+        foreach (var walk in dog.WalkEvents.ToList())
+            _uow.WalkEvents.Remove(walk);
+
         _uow.Dogs.Remove(dog);
         await _uow.CommitAsync(ct);
     }

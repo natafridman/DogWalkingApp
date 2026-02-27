@@ -44,7 +44,22 @@ public class Client
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void Deactivate() => IsActive = false;
+    /// <summary>
+    /// Business rule: a client with active or scheduled walks cannot be deactivated.
+    /// </summary>
+    public void Deactivate()
+    {
+        bool hasActiveWalks = _dogs
+            .SelectMany(d => d.WalkEvents)
+            .Any(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
+                               or WalkStatus.Accepted  or WalkStatus.InProgress);
+
+        if (hasActiveWalks)
+            throw new DomainException(
+                "Cannot deactivate a client who has active or in-progress walks.");
+
+        IsActive = false;
+    }
 
     public void Update(string name, string phoneNumber, string email, string zone = "")
     {

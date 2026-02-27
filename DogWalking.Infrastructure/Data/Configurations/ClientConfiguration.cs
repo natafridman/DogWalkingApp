@@ -49,6 +49,11 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
 
         builder.Property(c => c.UserId).IsRequired(false);
 
+        builder.HasMany(c => c.Dogs)
+               .WithOne(d => d.Client)
+               .HasForeignKey(d => d.ClientId)
+               .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(c => c.Email).IsUnique();
     }
 }

@@ -20,13 +20,16 @@ public class WalkEventService : IWalkEventService
     private readonly IUnitOfWork _uow;
     private readonly ILogger<WalkEventService> _log;
     private readonly IValidator<CreateWalkEventDto> _walkValidator;
+    private readonly IValidator<CreateAvailabilityDto> _availValidator;
 
     public WalkEventService(IUnitOfWork uow, ILogger<WalkEventService> log,
-                            IValidator<CreateWalkEventDto> walkValidator)
+                            IValidator<CreateWalkEventDto> walkValidator,
+                            IValidator<CreateAvailabilityDto> availValidator)
     {
         _uow = uow;
         _log = log;
         _walkValidator = walkValidator;
+        _availValidator = availValidator;
     }
 
     public async Task<IEnumerable<WalkEventDto>> GetByDogIdAsync(int dogId, CancellationToken ct = default)

@@ -22,6 +22,7 @@ public class ClientRepository : IClientRepository
     public async Task<Client?> GetByIdWithDogsAsync(int id, CancellationToken ct = default)
         => await _ctx.Clients
             .Include(c => c.Dogs)
+                .ThenInclude(d => d.WalkEvents)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<Client?> GetByUserIdAsync(int userId, CancellationToken ct = default)

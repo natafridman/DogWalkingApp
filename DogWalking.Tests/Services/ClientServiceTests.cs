@@ -55,7 +55,8 @@ public class ClientServiceTests
         _repo.Setup(r => r.GetByIdWithDogsAsync(1, default)).ReturnsAsync(client);
         var result = await _sut.GetByIdAsync(1);
         Assert.NotNull(result);
-        Assert.Equal("Jane", result.Name);
+        Assert.Equal("Jane",              result.Name);
+        Assert.Equal(SubscriptionType.Pro, result.Subscription);
     }
 
     [Fact]
@@ -70,5 +71,18 @@ public class ClientServiceTests
     {
         _repo.Setup(r => r.GetByIdWithDogsAsync(99, default)).ReturnsAsync((Client?)null);
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _sut.DeleteAsync(99));
+    }
+
+    [Fact]
+    public async Task ChangeSubscriptionAsync_UpdatesAndSaves()
+    {
+        var client = new Client("John", "+1234567890", "j@j.com");
+        _repo.Setup(r => r.GetByIdAsync(1, default)).ReturnsAsync(client);
+
+        var result = await _sut.ChangeSubscriptionAsync(
+            new ChangeSubscriptionDto(1, SubscriptionType.Premium));
+
+        Assert.Equal(SubscriptionType.Premium, result.Subscription);
+        _uow.Verify(u => u.CommitAsync(default), Times.Once);
     }
 }

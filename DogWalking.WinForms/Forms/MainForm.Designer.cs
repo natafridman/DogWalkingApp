@@ -14,6 +14,7 @@ partial class MainForm
         btnLogout = new Button();
         tabs = new TabControl();
 
+        // Admin tabs + controls
         tabClients = new TabPage();
         pnlClientsToolbar = new Panel();
         txtSearchClients = new TextBox();
@@ -36,12 +37,14 @@ partial class MainForm
         btnRefreshUsers = new Button();
         dgvAllUsers = new DataGridView();
 
+        // Walker tabs (content populated at runtime)
+        tabMySchedule = new TabPage();
+        tabMyAvailability = new TabPage();
+
+        // Client tabs (content populated at runtime)
         tabMyDogs = new TabPage();
         tabMyWalks = new TabPage();
         tabMySubscription = new TabPage();
-
-        tabMySchedule = new TabPage();
-        tabMyAvailability = new TabPage();
 
         pnlTopBar.SuspendLayout();
         tabClients.SuspendLayout();
@@ -54,7 +57,7 @@ partial class MainForm
         ((System.ComponentModel.ISupportInitialize)dgvAllUsers).BeginInit();
         SuspendLayout();
 
-        // ── pnlTopBar ─────────────────────────────────
+        // ── pnlTopBar ─────────────────────────────────────────
         pnlTopBar.BackColor = Color.FromArgb(30, 70, 150);
         pnlTopBar.Controls.Add(lblAppTitle);
         pnlTopBar.Controls.Add(lblSession);
@@ -93,23 +96,27 @@ partial class MainForm
         btnLogout.UseVisualStyleBackColor = false;
         btnLogout.Click += BtnLogout_Click;
 
-        // ── tabs ───────────────────────────────────────
+        // ── tabs ───────────────────────────────────────────────
         tabs.Controls.Add(tabClients);
         tabs.Controls.Add(tabWalks);
         tabs.Controls.Add(tabWalkers);
         tabs.Controls.Add(tabUsers);
+        tabs.Controls.Add(tabMySchedule);
+        tabs.Controls.Add(tabMyAvailability);
         tabs.Controls.Add(tabMyDogs);
         tabs.Controls.Add(tabMyWalks);
         tabs.Controls.Add(tabMySubscription);
-        tabs.Controls.Add(tabMySchedule);
-        tabs.Controls.Add(tabMyAvailability);
         tabs.Dock = DockStyle.Fill;
         tabs.Font = new Font("Segoe UI", 9F);
         tabs.Location = new Point(0, 46);
         tabs.Name = "tabs";
         tabs.Size = new Size(1050, 634);
 
-        // ═══ ADMIN TAB: Clients & Dogs ═══════════════
+        // ════════════════════════════════════════════════════════
+        // ADMIN TAB: Clients & Dogs
+        // ════════════════════════════════════════════════════════
+
+        // tabClients
         tabClients.BackColor = Color.WhiteSmoke;
         tabClients.Controls.Add(dgvClients);
         tabClients.Controls.Add(pnlClientsToolbar);
@@ -118,18 +125,21 @@ partial class MainForm
         tabClients.Text = "\U0001f415 Clients & Dogs";
         tabClients.Enter += TabClients_Enter;
 
+        // pnlClientsToolbar
         pnlClientsToolbar.Controls.Add(txtSearchClients);
         pnlClientsToolbar.Controls.Add(btnRefreshClients);
         pnlClientsToolbar.Location = new Point(10, 8);
         pnlClientsToolbar.Name = "pnlClientsToolbar";
         pnlClientsToolbar.Size = new Size(1000, 38);
 
+        // txtSearchClients
         txtSearchClients.Location = new Point(0, 7);
         txtSearchClients.Name = "txtSearchClients";
         txtSearchClients.PlaceholderText = "Search name or email\u2026";
         txtSearchClients.Size = new Size(300, 23);
         txtSearchClients.TextChanged += TxtSearchClients_TextChanged;
 
+        // btnRefreshClients
         btnRefreshClients.AutoSize = true;
         btnRefreshClients.BackColor = Color.FromArgb(30, 70, 150);
         btnRefreshClients.FlatStyle = FlatStyle.Flat;
@@ -142,6 +152,7 @@ partial class MainForm
         btnRefreshClients.UseVisualStyleBackColor = false;
         btnRefreshClients.Click += BtnRefreshClients_Click;
 
+        // dgvClients
         dgvClients.AllowUserToAddRows = false;
         dgvClients.AllowUserToDeleteRows = false;
         dgvClients.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -156,7 +167,11 @@ partial class MainForm
         dgvClients.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvClients.Size = new Size(1005, 525);
 
-        // ═══ ADMIN TAB: Walk Events ══════════════════
+        // ════════════════════════════════════════════════════════
+        // ADMIN TAB: Walk Events
+        // ════════════════════════════════════════════════════════
+
+        // tabWalks
         tabWalks.BackColor = Color.WhiteSmoke;
         tabWalks.Controls.Add(dgvWalks);
         tabWalks.Controls.Add(pnlWalksToolbar);
@@ -165,18 +180,21 @@ partial class MainForm
         tabWalks.Text = "Walk Events";
         tabWalks.Enter += TabWalks_Enter;
 
+        // pnlWalksToolbar
         pnlWalksToolbar.Controls.Add(cmbWalkStatus);
         pnlWalksToolbar.Controls.Add(btnNewWalk);
         pnlWalksToolbar.Location = new Point(10, 8);
         pnlWalksToolbar.Name = "pnlWalksToolbar";
         pnlWalksToolbar.Size = new Size(1000, 38);
 
+        // cmbWalkStatus
         cmbWalkStatus.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbWalkStatus.Location = new Point(0, 7);
         cmbWalkStatus.Name = "cmbWalkStatus";
         cmbWalkStatus.Size = new Size(160, 23);
         cmbWalkStatus.SelectedIndexChanged += CmbWalkStatus_SelectedIndexChanged;
 
+        // btnNewWalk
         btnNewWalk.AutoSize = true;
         btnNewWalk.BackColor = Color.FromArgb(30, 70, 150);
         btnNewWalk.FlatStyle = FlatStyle.Flat;
@@ -189,6 +207,7 @@ partial class MainForm
         btnNewWalk.UseVisualStyleBackColor = false;
         btnNewWalk.Click += BtnNewWalk_Click;
 
+        // dgvWalks
         dgvWalks.AllowUserToAddRows = false;
         dgvWalks.AllowUserToDeleteRows = false;
         dgvWalks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -203,7 +222,11 @@ partial class MainForm
         dgvWalks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvWalks.Size = new Size(1005, 525);
 
-        // ═══ ADMIN TAB: Walkers ══════════════════════
+        // ════════════════════════════════════════════════════════
+        // ADMIN TAB: Walkers
+        // ════════════════════════════════════════════════════════
+
+        // tabWalkers
         tabWalkers.BackColor = Color.WhiteSmoke;
         tabWalkers.Controls.Add(dgvWalkers);
         tabWalkers.Controls.Add(pnlWalkersToolbar);
@@ -212,11 +235,13 @@ partial class MainForm
         tabWalkers.Text = "\U0001f6b6 Walkers";
         tabWalkers.Enter += TabWalkers_Enter;
 
+        // pnlWalkersToolbar
         pnlWalkersToolbar.Controls.Add(btnRefreshWalkers);
         pnlWalkersToolbar.Location = new Point(10, 8);
         pnlWalkersToolbar.Name = "pnlWalkersToolbar";
         pnlWalkersToolbar.Size = new Size(1000, 38);
 
+        // btnRefreshWalkers
         btnRefreshWalkers.AutoSize = true;
         btnRefreshWalkers.BackColor = Color.FromArgb(30, 70, 150);
         btnRefreshWalkers.FlatStyle = FlatStyle.Flat;
@@ -229,6 +254,7 @@ partial class MainForm
         btnRefreshWalkers.UseVisualStyleBackColor = false;
         btnRefreshWalkers.Click += BtnRefreshWalkers_Click;
 
+        // dgvWalkers
         dgvWalkers.AllowUserToAddRows = false;
         dgvWalkers.AllowUserToDeleteRows = false;
         dgvWalkers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -243,7 +269,11 @@ partial class MainForm
         dgvWalkers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvWalkers.Size = new Size(1005, 525);
 
-        // ═══ ADMIN TAB: Users ═════════════════════════
+        // ════════════════════════════════════════════════════════
+        // ADMIN TAB: Users
+        // ════════════════════════════════════════════════════════
+
+        // tabUsers
         tabUsers.BackColor = Color.WhiteSmoke;
         tabUsers.Controls.Add(dgvAllUsers);
         tabUsers.Controls.Add(pnlUsersToolbar);
@@ -252,11 +282,13 @@ partial class MainForm
         tabUsers.Text = "\U0001f465 Users";
         tabUsers.Enter += TabUsers_Enter;
 
+        // pnlUsersToolbar
         pnlUsersToolbar.Controls.Add(btnRefreshUsers);
         pnlUsersToolbar.Location = new Point(10, 8);
         pnlUsersToolbar.Name = "pnlUsersToolbar";
         pnlUsersToolbar.Size = new Size(1000, 38);
 
+        // btnRefreshUsers
         btnRefreshUsers.AutoSize = true;
         btnRefreshUsers.BackColor = Color.FromArgb(30, 70, 150);
         btnRefreshUsers.FlatStyle = FlatStyle.Flat;
@@ -269,6 +301,7 @@ partial class MainForm
         btnRefreshUsers.UseVisualStyleBackColor = false;
         btnRefreshUsers.Click += BtnRefreshUsers_Click;
 
+        // dgvAllUsers
         dgvAllUsers.AllowUserToAddRows = false;
         dgvAllUsers.AllowUserToDeleteRows = false;
         dgvAllUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -283,29 +316,40 @@ partial class MainForm
         dgvAllUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvAllUsers.Size = new Size(1005, 525);
 
-        // ═══ CLIENT TABS (populated at runtime) ══════
+        // ════════════════════════════════════════════════════════
+        // WALKER TABS (content populated at runtime)
+        // ════════════════════════════════════════════════════════
+
+        // tabMySchedule
+        tabMySchedule.BackColor = Color.WhiteSmoke;
+        tabMySchedule.Name = "tabMySchedule";
+        tabMySchedule.Text = "My Schedule";
+
+        // tabMyAvailability
+        tabMyAvailability.BackColor = Color.WhiteSmoke;
+        tabMyAvailability.Name = "tabMyAvailability";
+        tabMyAvailability.Text = "My Availability";
+
+        // ════════════════════════════════════════════════════════
+        // CLIENT TABS (content populated at runtime)
+        // ════════════════════════════════════════════════════════
+
+        // tabMyDogs
         tabMyDogs.BackColor = Color.WhiteSmoke;
         tabMyDogs.Name = "tabMyDogs";
         tabMyDogs.Text = "\U0001f415 My Dogs";
 
+        // tabMyWalks
         tabMyWalks.BackColor = Color.WhiteSmoke;
         tabMyWalks.Name = "tabMyWalks";
         tabMyWalks.Text = "\U0001f9ae My Walks";
 
+        // tabMySubscription
         tabMySubscription.BackColor = Color.WhiteSmoke;
         tabMySubscription.Name = "tabMySubscription";
         tabMySubscription.Text = "\U0001f4cb My Subscription";
 
-        // ═══ WALKER TABS (populated at runtime) ═════
-        tabMySchedule.BackColor = Color.WhiteSmoke;
-        tabMySchedule.Name = "tabMySchedule";
-        tabMySchedule.Text = "\U0001f4c5 My Schedule";
-
-        tabMyAvailability.BackColor = Color.WhiteSmoke;
-        tabMyAvailability.Name = "tabMyAvailability";
-        tabMyAvailability.Text = "\u23f0 My Availability";
-
-        // ── MainForm ──────────────────────────────────
+        // ── MainForm ───────────────────────────────────────────
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.WhiteSmoke;
@@ -364,12 +408,12 @@ partial class MainForm
     private Button btnRefreshUsers;
     private DataGridView dgvAllUsers;
 
+    // Walker tabs
+    private TabPage tabMySchedule;
+    private TabPage tabMyAvailability;
+
     // Client tabs
     private TabPage tabMyDogs;
     private TabPage tabMyWalks;
     private TabPage tabMySubscription;
-
-    // Walker tabs
-    private TabPage tabMySchedule;
-    private TabPage tabMyAvailability;
 }
