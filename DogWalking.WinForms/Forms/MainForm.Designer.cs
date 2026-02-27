@@ -183,6 +183,9 @@ partial class MainForm
         // pnlWalksToolbar
         pnlWalksToolbar.Controls.Add(cmbWalkStatus);
         pnlWalksToolbar.Controls.Add(btnNewWalk);
+        pnlWalksToolbar.Controls.Add(btnWalksPrev);
+        pnlWalksToolbar.Controls.Add(lblWalksPage);
+        pnlWalksToolbar.Controls.Add(btnWalksNext);
         pnlWalksToolbar.Location = new Point(10, 8);
         pnlWalksToolbar.Name = "pnlWalksToolbar";
         pnlWalksToolbar.Size = new Size(1000, 38);
@@ -206,6 +209,40 @@ partial class MainForm
         btnNewWalk.Text = "+ New Walk";
         btnNewWalk.UseVisualStyleBackColor = false;
         btnNewWalk.Click += BtnNewWalk_Click;
+
+        // btnWalksPrev
+        btnWalksPrev = new Button();
+        btnWalksPrev.BackColor = Color.FromArgb(30, 70, 150);
+        btnWalksPrev.FlatStyle = FlatStyle.Flat;
+        btnWalksPrev.Font = new Font("Segoe UI", 9F);
+        btnWalksPrev.ForeColor = Color.White;
+        btnWalksPrev.Location = new Point(310, 5);
+        btnWalksPrev.Name = "btnWalksPrev";
+        btnWalksPrev.Size = new Size(32, 28);
+        btnWalksPrev.Text = "\u25c0";
+        btnWalksPrev.UseVisualStyleBackColor = false;
+        btnWalksPrev.Click += BtnWalksPrev_Click;
+
+        // lblWalksPage
+        lblWalksPage = new Label();
+        lblWalksPage.AutoSize = true;
+        lblWalksPage.Font = new Font("Segoe UI", 9F);
+        lblWalksPage.Location = new Point(350, 9);
+        lblWalksPage.Name = "lblWalksPage";
+        lblWalksPage.Text = "Page 1 of 1";
+
+        // btnWalksNext
+        btnWalksNext = new Button();
+        btnWalksNext.BackColor = Color.FromArgb(30, 70, 150);
+        btnWalksNext.FlatStyle = FlatStyle.Flat;
+        btnWalksNext.Font = new Font("Segoe UI", 9F);
+        btnWalksNext.ForeColor = Color.White;
+        btnWalksNext.Location = new Point(460, 5);
+        btnWalksNext.Name = "btnWalksNext";
+        btnWalksNext.Size = new Size(32, 28);
+        btnWalksNext.Text = "\u25b6";
+        btnWalksNext.UseVisualStyleBackColor = false;
+        btnWalksNext.Click += BtnWalksNext_Click;
 
         // dgvWalks
         dgvWalks.AllowUserToAddRows = false;
@@ -394,6 +431,9 @@ partial class MainForm
     private Panel pnlWalksToolbar;
     private ComboBox cmbWalkStatus;
     private Button btnNewWalk;
+    private Button btnWalksPrev;
+    private Label lblWalksPage;
+    private Button btnWalksNext;
     private DataGridView dgvWalks;
 
     // Admin: Walkers

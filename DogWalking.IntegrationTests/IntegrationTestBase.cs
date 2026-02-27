@@ -8,6 +8,7 @@ using DogWalking.Infrastructure;
 using DogWalking.Infrastructure.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DogWalking.IntegrationTests;
@@ -29,7 +30,7 @@ public abstract class IntegrationTestBase : IDisposable
             .UseSqlite(_conn).Options;
         Ctx = new DogWalkingDbContext(options);
         Ctx.Database.EnsureCreated();
-        Uow = new UnitOfWork(Ctx);
+        Uow = new UnitOfWork(Ctx, new MemoryCache(new MemoryCacheOptions()));
     }
 
     // ── Service factories ──────────────────────────────────────────────────

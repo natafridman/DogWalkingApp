@@ -19,7 +19,21 @@ public interface IWalkEventRepository
     Task<IEnumerable<WalkEvent>>  GetByClientAndMonthAsync(int clientId, int year, int month,
                                                            CancellationToken ct = default);
 
+    /// <summary>
+    /// Server-side count of active walks for subscription limit display.
+    /// Avoids loading full entities when only the count is needed.
+    /// </summary>
+    Task<int> CountActiveByClientAndMonthAsync(int clientId, int year, int month,
+                                               CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns a paged subset of walks filtered by status, with total count for UI pagination.
+    /// </summary>
+    Task<(IEnumerable<WalkEvent> Items, int TotalCount)> GetByStatusPagedAsync(
+        WalkStatus status, int page, int pageSize, CancellationToken ct = default);
+
     Task AddAsync(WalkEvent walkEvent, CancellationToken ct = default);
+    Task AddRangeAsync(IEnumerable<WalkEvent> walkEvents, CancellationToken ct = default);
     void Update(WalkEvent walkEvent);
     void Remove(WalkEvent walkEvent);
 }

@@ -41,7 +41,8 @@ public class WalkEventConfiguration : IEntityTypeConfiguration<WalkEvent>
         builder.Navigation(w => w.Declines)
                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        // Composite index for efficient subscription validation queries
-        builder.HasIndex(w => new { w.DogId, w.WalkDate });
+        // Composite indexes for efficient query patterns
+        builder.HasIndex(w => new { w.DogId, w.WalkDate, w.Status });
+        builder.HasIndex(w => new { w.Status, w.WalkDate });
     }
 }

@@ -10,12 +10,14 @@ namespace DogWalking.Infrastructure.Messaging;
 /// <summary>
 /// LAN notification service using UDP multicast.
 /// All app instances on the same network automatically receive broadcasts.
+/// Uses a long-lived sender UdpClient to avoid socket allocation per publish.
 /// Swap this implementation for cloud messaging (Azure Service Bus, RabbitMQ, etc.)
 /// by registering a different INotificationService in DI.
 /// </summary>
 public class UdpNotificationService : INotificationService
 {
     private UdpClient? _listener;
+    private UdpClient? _sender;
     private CancellationTokenSource? _cts;
     private static readonly IPAddress MulticastAddress = IPAddress.Parse("239.255.0.1");
     private const int Port = 5150;
@@ -26,13 +28,13 @@ public class UdpNotificationService : INotificationService
     {
         try
         {
-            using var client = new UdpClient();
+            _sender ??= new UdpClient();
             var json  = JsonSerializer.Serialize(notification);
             var bytes = Encoding.UTF8.GetBytes(json);
-            await client.SendAsync(bytes, new IPEndPoint(MulticastAddress, Port), ct);
+            await _sender.SendAsync(bytes, new IPEndPoint(MulticastAddress, Port), ct);
         }
         catch (SocketException) { /* Network unavailable — best-effort */ }
-        catch (ObjectDisposedException) { }
+        catch (ObjectDisposedException) { _sender = null; }
     }
 
     public Task StartAsync(CancellationToken ct = default)
@@ -73,6 +75,8 @@ public class UdpNotificationService : INotificationService
         try { _listener?.DropMulticastGroup(MulticastAddress); } catch { }
         _listener?.Dispose();
         _listener = null;
+        _sender?.Dispose();
+        _sender = null;
         return Task.CompletedTask;
     }
 

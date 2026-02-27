@@ -50,6 +50,10 @@ public partial class MainForm : Form
     // LAN notification service
     private readonly INotificationService _notifier;
 
+    // Walk Events pagination
+    private int _walksPage = 1;
+    private const int WalksPageSize = 10;
+
     public MainForm(IServiceScopeFactory scopeFactory)
     {
         _scope    = scopeFactory.CreateScope();
@@ -184,7 +188,13 @@ public partial class MainForm : Form
         => await LoadClientsAsync();
 
     private async void CmbWalkStatus_SelectedIndexChanged(object? sender, EventArgs e)
-        => await LoadWalksAsync();
+    { _walksPage = 1; await LoadWalksAsync(); }
+
+    private async void BtnWalksPrev_Click(object? sender, EventArgs e)
+    { if (_walksPage > 1) { _walksPage--; await LoadWalksAsync(); } }
+
+    private async void BtnWalksNext_Click(object? sender, EventArgs e)
+    { _walksPage++; await LoadWalksAsync(); }
 
     private async void BtnNewWalk_Click(object? sender, EventArgs e)
     {
@@ -248,9 +258,21 @@ public partial class MainForm : Form
         try
         {
             var status = Enum.Parse<WalkStatus>(cmbWalkStatus.SelectedItem!.ToString()!);
-            var list   = await _walks.GetByStatusAsync(status, _cts.Token);
-            dgvWalks.DataSource = WalkRows(list);
+            var paged  = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, _cts.Token);
+
+            // Clamp page if it overshoots (e.g. after deleting the last item on a page)
+            if (_walksPage > paged.TotalPages && paged.TotalPages > 0)
+            {
+                _walksPage = paged.TotalPages;
+                paged = await _walks.GetByStatusPagedAsync(status, _walksPage, WalksPageSize, _cts.Token);
+            }
+
+            dgvWalks.DataSource = WalkRows(paged.Items);
             HideCol(dgvWalks, "Id");
+
+            lblWalksPage.Text    = $"Page {paged.Page} of {Math.Max(1, paged.TotalPages)} ({paged.TotalCount} total)";
+            btnWalksPrev.Enabled = paged.HasPreviousPage;
+            btnWalksNext.Enabled = paged.HasNextPage;
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { ShowError(ex.Message); }

@@ -62,6 +62,42 @@ public class WalkEventRepository : IWalkEventRepository
                         && w.WalkDate.Month == month)
             .ToListAsync(ct);
 
+    /// <summary>
+    /// Server-side projection: counts only active walks without materializing entities.
+    /// </summary>
+    public async Task<int> CountActiveByClientAndMonthAsync(
+        int clientId, int year, int month, CancellationToken ct = default)
+        => await _ctx.WalkEvents
+            .AsNoTracking()
+            .Where(w => w.Dog.ClientId == clientId
+                        && w.WalkDate.Year  == year
+                        && w.WalkDate.Month == month
+                        && (w.Status == WalkStatus.Requested || w.Status == WalkStatus.Proposed
+                         || w.Status == WalkStatus.Accepted  || w.Status == WalkStatus.InProgress))
+            .CountAsync(ct);
+
+    /// <summary>
+    /// Server-side pagination with total count — avoids loading all rows into memory.
+    /// </summary>
+    public async Task<(IEnumerable<WalkEvent> Items, int TotalCount)> GetByStatusPagedAsync(
+        WalkStatus status, int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _ctx.WalkEvents
+            .AsNoTracking()
+            .Where(w => w.Status == status)
+            .Include(w => w.Dog).ThenInclude(d => d.Client)
+            .Include(w => w.Walker)
+            .OrderBy(w => w.WalkDate);
+
+        var total = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return (items, total);
+    }
+
     public async Task<IEnumerable<WalkEvent>> GetByWalkerIdAsync(int walkerId,
                                                                    CancellationToken ct = default)
         => await _ctx.WalkEvents
@@ -84,6 +120,9 @@ public class WalkEventRepository : IWalkEventRepository
 
     public async Task AddAsync(WalkEvent walkEvent, CancellationToken ct = default)
         => await _ctx.WalkEvents.AddAsync(walkEvent, ct);
+
+    public async Task AddRangeAsync(IEnumerable<WalkEvent> walkEvents, CancellationToken ct = default)
+        => await _ctx.WalkEvents.AddRangeAsync(walkEvents, ct);
 
     public void Update(WalkEvent walkEvent) => _ctx.WalkEvents.Update(walkEvent);
     public void Remove(WalkEvent walkEvent) => _ctx.WalkEvents.Remove(walkEvent);

@@ -143,19 +143,15 @@ public class WalkEventService : IWalkEventService
         // Generate all dates (1 for OneTime, multiple for recurring patterns)
         var dates = GenerateRecurrenceDates(dto.WalkDate, dto.RecurrenceType);
 
-        WalkEvent? firstWalk = null;
-        foreach (var date in dates)
-        {
-            var walkEvent = new WalkEvent(dto.DogId, date, dto.DurationMinutes,
-                                          dto.Location, dto.Notes, dto.RecurrenceType);
-            await _uow.WalkEvents.AddAsync(walkEvent, ct);
-            firstWalk ??= walkEvent;
-        }
+        var walkEvents = dates.Select(date =>
+            new WalkEvent(dto.DogId, date, dto.DurationMinutes,
+                          dto.Location, dto.Notes, dto.RecurrenceType)).ToList();
 
+        await _uow.WalkEvents.AddRangeAsync(walkEvents, ct);
         await _uow.CommitAsync(ct);
         _log.LogInformation("Walk event(s) scheduled for dog {DogId} on {Date}",
             dto.DogId, dto.WalkDate);
-        return MapToDto(firstWalk!, dog);
+        return MapToDto(walkEvents[0], dog);
     }
 
     /// <summary>
@@ -338,13 +334,21 @@ public class WalkEventService : IWalkEventService
         var client = await _uow.Clients.GetByIdAsync(clientId, ct)
             ?? throw new KeyNotFoundException($"Client {clientId} not found.");
 
-        var walks = await _uow.WalkEvents.GetByClientAndMonthAsync(clientId, year, month, ct);
+        // Server-side count projection — avoids loading full entities
+        int active = await _uow.WalkEvents.CountActiveByClientAndMonthAsync(clientId, year, month, ct);
         var strategy = WalkLimitStrategyFactory.Create(client.Subscription);
 
-        int active = walks.Count(w => w.Status is WalkStatus.Requested or WalkStatus.Proposed
-                                                or WalkStatus.Accepted  or WalkStatus.InProgress);
         int remaining = Math.Max(0, strategy.MaxWalksPerMonth - active);
         return new MonthlyWalkSummaryDto(active, strategy.MaxWalksPerMonth, remaining, strategy.Description);
+    }
+
+    public async Task<PagedResultDto<WalkEventDto>> GetByStatusPagedAsync(
+        WalkStatus status, int page, int pageSize, CancellationToken ct = default)
+    {
+        var (items, total) = await _uow.WalkEvents.GetByStatusPagedAsync(status, page, pageSize, ct);
+        return new PagedResultDto<WalkEventDto>(
+            items.Select(w => MapToDto(w)).ToList(),
+            total, page, pageSize);
     }
 
     private async Task NotifyAsync(WalkNotification notification, CancellationToken ct)

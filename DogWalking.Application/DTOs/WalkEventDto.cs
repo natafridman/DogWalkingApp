@@ -42,3 +42,11 @@ public record AssignWalkerDto(int WalkEventId, int? WalkerId);
 
 /// <summary>Monthly summary of walk usage vs subscription limits.</summary>
 public record MonthlyWalkSummaryDto(int ActiveCount, int MaxWalksPerMonth, int Remaining, string PlanDescription);
+
+/// <summary>Generic paged result for server-side pagination.</summary>
+public record PagedResultDto<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize)
+{
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+    public bool HasPreviousPage => Page > 1;
+    public bool HasNextPage => Page < TotalPages;
+}

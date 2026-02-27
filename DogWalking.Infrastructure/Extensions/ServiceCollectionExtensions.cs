@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDogWalkingServices(this IServiceCollection services, string conn)
     {
         services.AddDbContext<DogWalkingDbContext>(o => o.UseSqlServer(conn));
+        services.AddMemoryCache();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IClientService, ClientService>();
