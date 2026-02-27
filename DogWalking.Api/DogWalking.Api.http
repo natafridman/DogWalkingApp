@@ -1,0 +1,16 @@
+@host = http://localhost:5026
+
+### 1. Get access token (OAuth2 ROPC)
+POST {{host}}/api/auth/token
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 2. Get current user info (requires token from step 1)
+GET {{host}}/api/me
+Authorization: Bearer <paste_access_token_here>
+
+###
