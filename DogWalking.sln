@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogWalking.Domain", "DogWalking.Domain\DogWalking.Domain.csproj", "{62F9170E-DEEE-403B-BEFB-BCEFAF6BB7E4}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogWalking.UnitTests", "DogWalking.Tests\DogWalking.UnitTests.csproj", "{7AFEF9AC-90B6-40A4-AC10-92C6A2410708}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogWalking.IntegrationTests", "DogWalking.IntegrationTests\DogWalking.IntegrationTests.csproj", "{0A467E8A-412C-47F2-A17D-BED40F8F8696}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogWalking.Api", "DogWalking.Api\DogWalking.Api.csproj", "{B4C973BC-0D98-4036-A4AE-EE3986A479EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,18 @@ Global
 		{0A467E8A-412C-47F2-A17D-BED40F8F8696}.Release|x64.Build.0 = Release|Any CPU
 		{0A467E8A-412C-47F2-A17D-BED40F8F8696}.Release|x86.ActiveCfg = Release|Any CPU
 		{0A467E8A-412C-47F2-A17D-BED40F8F8696}.Release|x86.Build.0 = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|x64.Build.0 = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Debug|x86.Build.0 = Debug|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|x64.ActiveCfg = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|x64.Build.0 = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|x86.ActiveCfg = Release|Any CPU
+		{B4C973BC-0D98-4036-A4AE-EE3986A479EE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
