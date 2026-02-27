@@ -43,20 +43,6 @@ public class User
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void UpdatePasswordHash(string newHash)
-    {
-        if (string.IsNullOrWhiteSpace(newHash))
-            throw new DomainException("Password hash cannot be empty.");
-        PasswordHash = newHash;
-    }
-
-    public void UpdateFullName(string fullName)
-    {
-        if (string.IsNullOrWhiteSpace(fullName))
-            throw new DomainException("Full name cannot be empty.");
-        FullName = fullName.Trim();
-    }
-
     public void UpdateContactInfo(string? phone, string? email)
     {
         Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
@@ -64,5 +50,4 @@ public class User
     }
 
     public void Deactivate() => IsActive = false;
-    public void Activate() => IsActive = true;
 }

@@ -434,17 +434,6 @@ public partial class MainForm : Form
         tabMyAvailability.Controls.Add(_cfgStatus);
     }
 
-    private async Task LoadMyAvailabilityAsync()
-    {
-        try
-        {
-            var user = await _users.GetByIdAsync(_userId);
-            _cfgPhone.Text = user?.Phone ?? string.Empty;
-            _cfgEmail.Text = user?.Email ?? string.Empty;
-        }
-        catch (Exception ex) { ShowCfgStatus(ex.Message, isError: true); }
-    }
-
     private async Task SaveWalkerContactInfoAsync()
     {
         try
@@ -463,56 +452,6 @@ public partial class MainForm : Form
         _cfgStatus.Text      = msg;
         _cfgStatus.ForeColor = isError ? Color.Crimson : Color.DarkGreen;
         _cfgStatus.Visible   = true;
-    }
-
-    private async Task EditWalkerContactInfoAsync()
-    {
-        var current = await _users.GetByIdAsync(_userId);
-
-        var dlg = new Form
-        {
-            Text = "Edit Contact Info", Size = new Size(360, 220),
-            StartPosition = FormStartPosition.CenterParent,
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            MaximizeBox = false, BackColor = Color.WhiteSmoke
-        };
-        var txtPhone = InlineField(dlg, "Phone", 16);
-        var txtEmail = InlineField(dlg, "Email", 76);
-        txtPhone.Text = current?.Phone ?? string.Empty;
-        txtEmail.Text = current?.Email ?? string.Empty;
-
-        var lblErr = new Label
-        {
-            ForeColor = Color.Crimson, Location = new Point(16, 136),
-            Size = new Size(310, 20), Visible = false
-        };
-        dlg.Controls.Add(lblErr);
-
-        bool saved = false;
-        var btnSave = new Button
-        {
-            Text = "Save", Location = new Point(16, 136), Width = 120, Height = 28,
-            BackColor = Color.FromArgb(30, 70, 150), ForeColor = Color.White, FlatStyle = FlatStyle.Flat
-        };
-        btnSave.Click += (_, _) => { saved = true; dlg.DialogResult = DialogResult.OK; dlg.Close(); };
-        dlg.Controls.Add(btnSave);
-
-        var btnCancel = new Button { Text = "Cancel", Location = new Point(152, 136), Width = 80, Height = 28, FlatStyle = FlatStyle.Flat };
-        btnCancel.Click += (_, _) => dlg.Close();
-        dlg.Controls.Add(btnCancel);
-
-        dlg.ShowDialog(this);
-        if (!saved) return;
-
-        try
-        {
-            await _users.UpdateContactInfoAsync(
-                _userId,
-                string.IsNullOrWhiteSpace(txtPhone.Text) ? null : txtPhone.Text.Trim(),
-                string.IsNullOrWhiteSpace(txtEmail.Text) ? null : txtEmail.Text.Trim());
-            MessageBox.Show("Contact info updated.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex) { ShowError(ex.Message); }
     }
 
     // ════════════════════════════════════════════════════════════════

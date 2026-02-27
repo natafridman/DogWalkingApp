@@ -70,8 +70,6 @@ public class Client
         Zone = zone.Trim();
     }
 
-    public void UpdateZone(string zone) => Zone = zone.Trim();
-
     /// <summary>
     /// Changes the subscription plan for this client.
     /// Downgrading is allowed but does not retroactively cancel existing walks.
