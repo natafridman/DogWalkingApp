@@ -22,6 +22,7 @@ public partial class MainForm : Form
     private readonly IAuthService               _auth;
     private readonly IDogService                _dogSvc;
     private readonly IWalkerAvailabilityService _availSvc;
+    private readonly IAiWalkParserService       _aiParser;
 
     // Session state
     private int     _userId;
@@ -64,6 +65,7 @@ public partial class MainForm : Form
         _auth     = sp.GetRequiredService<IAuthService>();
         _dogSvc   = sp.GetRequiredService<IDogService>();
         _availSvc = sp.GetRequiredService<IWalkerAvailabilityService>();
+        _aiParser = sp.GetRequiredService<IAiWalkParserService>();
         _notifier = sp.GetRequiredService<INotificationService>();
         InitializeComponent();
 
@@ -103,14 +105,12 @@ public partial class MainForm : Form
         {
             case "Admin":
                 ShowTabs(tabClients, tabWalks, tabWalkers, tabUsers);
-                await LoadClientsAsync();
                 break;
 
             case "Walker":
                 PopulateMyScheduleTab();
                 PopulateMyAvailabilityTab();
                 ShowTabs(tabMySchedule, tabMyAvailability);
-                await LoadMyScheduleAsync();
                 break;
 
             case "Client":
@@ -127,7 +127,6 @@ public partial class MainForm : Form
                 PopulateMyClientWalksTab();
                 PopulateMySubscriptionTab(client);
                 ShowTabs(tabMyDogs, tabMyWalks, tabMySubscription);
-                await LoadMyDogsAsync();
                 break;
         }
 
@@ -592,12 +591,24 @@ public partial class MainForm : Form
     {
         try
         {
-            var list = await _dogSvc.GetByClientIdAsync(_clientId, _cts.Token);
+            var list  = await _dogSvc.GetByClientIdAsync(_clientId, _cts.Token);
+            var walks = await _walks.GetByClientIdAsync(_clientId, _cts.Token);
+
+            var now = DateTime.UtcNow;
+            var nextWalkByDog = walks
+                .Where(w => w.WalkDate > now && w.WalkerId != null
+                    && (w.Status == WalkStatus.Accepted || w.Status == WalkStatus.InProgress))
+                .GroupBy(w => w.DogId)
+                .ToDictionary(g => g.Key, g => g.MinBy(w => w.WalkDate)!);
+
             _dgvMyDogs.DataSource = list.Select(d => new
             {
                 d.Id, d.Name, d.Breed,
                 BirthDate = d.BirthDate.ToString("yyyy-MM-dd"),
-                Age       = $"{d.AgeInYears} yrs"
+                Age       = $"{d.AgeInYears} yrs",
+                NextWalk  = nextWalkByDog.TryGetValue(d.Id, out var nw)
+                    ? nw.WalkDate.ToLocalTime().ToString("ddd dd/MM  HH:mm")
+                    : "—"
             }).ToList();
             HideCol(_dgvMyDogs, "Id");
         }
@@ -653,8 +664,9 @@ public partial class MainForm : Form
                 if (f.ShowDialog() == DialogResult.OK)
                     await LoadClientWalksAsync();
             }),
-            Btn("\u21bb Refresh", 140, async () => await LoadClientWalksAsync()),
-            Btn("\U0001f5d1\ufe0f Delete",  260, async () => await DeleteMyWalkAsync())
+            Btn("\U0001f916 Request Walk IA", 140, async () => await OpenAiWalkRequestAsync()),
+            Btn("\u21bb Refresh", 310, async () => await LoadClientWalksAsync()),
+            Btn("\U0001f5d1\ufe0f Delete",  420, async () => await DeleteMyWalkAsync())
         });
 
         // ── Remaining walks panel ─────────────────────────────────────
@@ -697,6 +709,21 @@ public partial class MainForm : Form
         if (MessageBox.Show("Delete this walk? This cannot be undone.",
                 "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
         try { await _walks.DeleteAsync(id); await LoadClientWalksAsync(); }
+        catch (Exception ex) { ShowError(ex.Message); }
+    }
+
+    private async Task OpenAiWalkRequestAsync()
+    {
+        try
+        {
+            var dogs = (await _dogSvc.GetByClientIdAsync(_clientId)).ToList();
+            var client = await _clients.GetByIdAsync(_clientId);
+            var zone = client?.Zone ?? "Palermo";
+
+            var form = new AiWalkRequestForm(_aiParser, _walks, _dogSvc, _clientId, dogs, zone);
+            if (form.ShowDialog() == DialogResult.OK)
+                await LoadClientWalksAsync();
+        }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
