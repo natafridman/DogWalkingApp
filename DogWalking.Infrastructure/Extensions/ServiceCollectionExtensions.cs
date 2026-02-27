@@ -5,7 +5,6 @@ using DogWalking.Application.Validators;
 using DogWalking.Domain.Enums;
 using DogWalking.Domain.Interfaces;
 using DogWalking.Infrastructure.Data;
-
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

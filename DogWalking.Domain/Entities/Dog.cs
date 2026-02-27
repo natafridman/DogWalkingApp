@@ -23,7 +23,6 @@ public class Dog
     private readonly List<WalkEvent> _walkEvents = new();
     public IReadOnlyCollection<WalkEvent> WalkEvents => _walkEvents.AsReadOnly();
 
-
     private Dog() { }
 
     public Dog(int clientId, string name, string breed, DateOnly birthDate)

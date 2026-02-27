@@ -4,7 +4,6 @@ using DogWalking.Domain.Entities;
 using DogWalking.Domain.Enums;
 using DogWalking.Domain.Interfaces;
 using DogWalking.Domain.Services;
-
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 

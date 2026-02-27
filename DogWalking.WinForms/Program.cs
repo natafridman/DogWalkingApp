@@ -32,5 +32,5 @@ static class Program
         await ServiceProvider.InitializeDatabaseAsync();
 
         System.Windows.Forms.Application.Run(ServiceProvider.GetRequiredService<LoginForm>());
-    }    
+    }
 }
