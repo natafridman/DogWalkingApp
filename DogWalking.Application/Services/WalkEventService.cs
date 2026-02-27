@@ -65,6 +65,45 @@ public class WalkEventService : IWalkEventService
         return walks.Where(w => w.Status == WalkStatus.Proposed).Select(x => MapToDto(x));
     }
 
+    public async Task<IEnumerable<WalkEventDto>> GetMatchingRequestsForWalkerAsync(
+        int walkerId, CancellationToken ct = default)
+    {
+        var requested    = await _uow.WalkEvents.GetByStatusAsync(WalkStatus.Requested, ct);
+        var availability = await _uow.WalkerAvailabilities.GetByWalkerIdAsync(walkerId, ct);
+
+        return requested.Where(w =>
+        {
+            var local    = w.WalkDate.ToLocalTime();
+            var walkTime = TimeOnly.FromDateTime(local);
+            var walkDay  = local.DayOfWeek;
+            // A slot matches when it covers the day+time AND its zone matches the walk location
+            return availability.Any(a => a.DayOfWeek == walkDay
+                                      && a.CoversWalk(walkTime, w.DurationMinutes)
+                                      && a.IsInZone(w.Location));
+        }).Select(w => MapToDto(w));
+    }
+
+    public async Task<WalkEventDto> ClaimWalkAsync(int walkEventId, int walkerId,
+        CancellationToken ct = default)
+    {
+        var walk = await _uow.WalkEvents.GetByIdAsync(walkEventId, ct)
+            ?? throw new KeyNotFoundException($"Walk event {walkEventId} not found.");
+
+        var walker = await _uow.Users.GetByIdAsync(walkerId, ct)
+            ?? throw new KeyNotFoundException($"Walker {walkerId} not found.");
+
+        if (walker.Role != UserRole.Walker)
+            throw new InvalidOperationException($"User '{walker.Username}' is not a Walker.");
+
+        // Atomically assign + accept in one domain transaction
+        walk.ProposeToWalker(walkerId);
+        walk.AcceptByWalker();
+
+        _uow.WalkEvents.Update(walk);
+        await _uow.CommitAsync(ct);
+        return MapToDto(walk);
+    }
+
     public async Task<WalkEventDto> ScheduleAsync(CreateWalkEventDto dto, CancellationToken ct = default)
     {
         await _walkValidator.ValidateAndThrowAsync(dto, ct);

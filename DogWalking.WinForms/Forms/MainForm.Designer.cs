@@ -40,6 +40,9 @@ partial class MainForm
         tabMyWalks = new TabPage();
         tabMySubscription = new TabPage();
 
+        tabMySchedule = new TabPage();
+        tabMyAvailability = new TabPage();
+
         pnlTopBar.SuspendLayout();
         tabClients.SuspendLayout();
         tabWalks.SuspendLayout();
@@ -98,6 +101,8 @@ partial class MainForm
         tabs.Controls.Add(tabMyDogs);
         tabs.Controls.Add(tabMyWalks);
         tabs.Controls.Add(tabMySubscription);
+        tabs.Controls.Add(tabMySchedule);
+        tabs.Controls.Add(tabMyAvailability);
         tabs.Dock = DockStyle.Fill;
         tabs.Font = new Font("Segoe UI", 9F);
         tabs.Location = new Point(0, 46);
@@ -291,6 +296,15 @@ partial class MainForm
         tabMySubscription.Name = "tabMySubscription";
         tabMySubscription.Text = "\U0001f4cb My Subscription";
 
+        // ═══ WALKER TABS (populated at runtime) ═════
+        tabMySchedule.BackColor = Color.WhiteSmoke;
+        tabMySchedule.Name = "tabMySchedule";
+        tabMySchedule.Text = "\U0001f4c5 My Schedule";
+
+        tabMyAvailability.BackColor = Color.WhiteSmoke;
+        tabMyAvailability.Name = "tabMyAvailability";
+        tabMyAvailability.Text = "\u23f0 My Availability";
+
         // ── MainForm ──────────────────────────────────
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -354,4 +368,8 @@ partial class MainForm
     private TabPage tabMyDogs;
     private TabPage tabMyWalks;
     private TabPage tabMySubscription;
+
+    // Walker tabs
+    private TabPage tabMySchedule;
+    private TabPage tabMyAvailability;
 }

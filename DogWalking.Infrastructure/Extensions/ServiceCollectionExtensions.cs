@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDogService, DogService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IWalkEventService, WalkEventService>();
+        services.AddScoped<IWalkerAvailabilityService, WalkerAvailabilityService>();
 
         services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
 
@@ -48,9 +49,10 @@ public static class ServiceCollectionExtensions
         await auth.CreateUserAsync(new CreateUserDto(
             "admin", "admin123", "System Administrator", UserRole.Admin));
 
-        // Seed a default client for demo
-        await auth.CreateUserAsync(new CreateUserDto(
-            "nata", "natafridman", "Nataniel Fridman", UserRole.Client));
+        // Seed a default client for demo (must use RegisterClientUserAsync to create Client entity)
+        await auth.RegisterClientUserAsync(new RegisterClientUserDto(
+            "nata", "natafridman", "Nataniel Fridman",
+            "+1234567890", "nata@test.com", SubscriptionType.Basic, "123 Demo Street", "natafridman"));
 
         // Seed a default walker for demo
         await auth.CreateUserAsync(new CreateUserDto(

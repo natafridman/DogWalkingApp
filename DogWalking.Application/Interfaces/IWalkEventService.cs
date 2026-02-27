@@ -14,6 +14,12 @@ public interface IWalkEventService
     /// <summary>Walk proposals pending the given walker's response (status = Proposed).</summary>
     Task<IEnumerable<WalkEventDto>> GetProposedForWalkerAsync(int walkerId, CancellationToken ct = default);
 
+    /// <summary>All Requested walks whose location and time match this walker's zones/availability.</summary>
+    Task<IEnumerable<WalkEventDto>> GetMatchingRequestsForWalkerAsync(int walkerId, CancellationToken ct = default);
+
+    /// <summary>Walker self-assigns and accepts a Requested walk in one atomic step.</summary>
+    Task<WalkEventDto> ClaimWalkAsync(int walkEventId, int walkerId, CancellationToken ct = default);
+
     /// <summary>Client submits a walk request — creates the event with Requested status.</summary>
     Task<WalkEventDto> ScheduleAsync(CreateWalkEventDto dto, CancellationToken ct = default);
 
