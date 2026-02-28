@@ -3,6 +3,7 @@ using DogWalking.Infrastructure.Extensions;
 using DogWalking.WinForms.Forms;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 using App = System.Windows.Forms.Application;
 
@@ -29,38 +30,55 @@ static class Program
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
             .Build();
 
-        // DI container
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddDatabase(config);
-        services.AddServices();
-        services.AddCaching();
-        services.AddNotifications();
-        services.AddAI(config);
+        // Serilog — console + rolling file
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(config)
+            .CreateLogger();
 
-        // WinForms — Transient so each form is a fresh instance
-        services.AddTransient<LoginForm>();
-        services.AddTransient<MainForm>();
-        services.AddTransient<DogDialog>();
-        services.AddTransient<WalkEventForm>();
+        try
+        {
+            // DI container
+            var services = new ServiceCollection();
+            services.AddLogging(lb => lb.AddSerilog());
+            services.AddDatabase(config);
+            services.AddServices();
+            services.AddCaching();
+            services.AddNotifications();
+            services.AddAI(config);
 
-        ServiceProvider = services.BuildServiceProvider();
+            // WinForms — Transient so each form is a fresh instance
+            services.AddTransient<LoginForm>();
+            services.AddTransient<MainForm>();
+            services.AddTransient<DogDialog>();
+            services.AddTransient<WalkEventForm>();
 
-        ServiceProvider.InitializeDatabaseAsync()
-            .GetAwaiter()
-            .GetResult();
+            ServiceProvider = services.BuildServiceProvider();
 
-        // Start LAN notification listener
-        var notifier = ServiceProvider.GetRequiredService<INotificationService>();
-        notifier.StartAsync()
-            .GetAwaiter()
-            .GetResult();
+            ServiceProvider.InitializeDatabaseAsync()
+                .GetAwaiter()
+                .GetResult();
 
-        App.Run(ServiceProvider.GetRequiredService<LoginForm>());
+            // Start LAN notification listener
+            var notifier = ServiceProvider.GetRequiredService<INotificationService>();
+            notifier.StartAsync()
+                .GetAwaiter()
+                .GetResult();
 
-        // Clean shutdown
-        notifier.StopAsync()
-            .GetAwaiter()
-            .GetResult();
+            Log.Information("Application started");
+            App.Run(ServiceProvider.GetRequiredService<LoginForm>());
+
+            // Clean shutdown
+            notifier.StopAsync()
+                .GetAwaiter()
+                .GetResult();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 }

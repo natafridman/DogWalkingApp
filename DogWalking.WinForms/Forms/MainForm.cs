@@ -32,13 +32,18 @@ public partial class MainForm : Form
     private Action? _onLogout;
 
     // Form-scoped DI scope + cancellation
-    private readonly IServiceScope           _scope;
-    private readonly CancellationTokenSource _cts = new();
+    private readonly IServiceScope _scope;
+    private CancellationTokenSource        _cts = new();
 
     // Serialises all DB operations through the single scoped DbContext.
     // EF Core's DbContext is NOT thread-safe; WinForms re-entrant events
     // (e.g. Tab.Enter firing twice) would otherwise cause concurrent access.
     private readonly SemaphoreSlim _dbLock = new(1, 1);
+
+    // True only after ApplyRoleLayoutAsync finishes tab setup.
+    // Prevents Enter events (fired by ShowTabs/AddRange and main.Show())
+    // from loading data before the session is fully initialised.
+    private bool _ready;
 
     // Walker calendar (created at runtime)
     private WalkCalendarPanel _calWalker = null!;
@@ -106,6 +111,14 @@ public partial class MainForm : Form
 
     public async Task ApplyRoleLayoutAsync()
     {
+        _ready = false;
+
+        // Drain any in-flight DB work left over from the previous session.
+        // Without this, a lingering async operation could still be using
+        // the scoped DbContext when we start the new session.
+        await _dbLock.WaitAsync();
+        _dbLock.Release();
+
         switch (_userRole)
         {
             case "Admin":
@@ -135,8 +148,12 @@ public partial class MainForm : Form
                 break;
         }
 
+        // Now safe: ShowTabs already fired (and skipped) Enter events.
+        // main.Show() will fire Enter for the first tab and trigger the load.
+        _ready = true;
+
         // Subscribe to LAN notifications
-        _notifier.NotificationReceived -= OnNotificationReceived; // avoid double-subscribe
+        _notifier.NotificationReceived -= OnNotificationReceived;
         _notifier.NotificationReceived += OnNotificationReceived;
     }
 
@@ -172,7 +189,15 @@ public partial class MainForm : Form
 
     private void Logout()
     {
+        _ready = false;
         _notifier.NotificationReceived -= OnNotificationReceived;
+
+        // Cancel outstanding async DB operations so the semaphore drains fast
+        // when the next session calls ApplyRoleLayoutAsync.
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = new CancellationTokenSource();
+
         _onLogout?.Invoke();  // Re-shows the LoginForm
         tabs.TabPages.Clear();
         _userId = 0; _userRole = string.Empty; _fullName = string.Empty; _clientId = 0;
@@ -217,25 +242,25 @@ public partial class MainForm : Form
         => await LoadAllUsersAsync();
 
     private async void TabClients_Enter(object? sender, EventArgs e)
-        => await LoadClientsAsync();
+    { if (_ready) await LoadClientsAsync(); }
 
     private async void TabWalks_Enter(object? sender, EventArgs e)
-        => await LoadWalksAsync();
+    { if (_ready) await LoadWalksAsync(); }
 
     private async void TabWalkers_Enter(object? sender, EventArgs e)
-        => await LoadWalkersAsync();
+    { if (_ready) await LoadWalkersAsync(); }
 
     private async void TabUsers_Enter(object? sender, EventArgs e)
-        => await LoadAllUsersAsync();
+    { if (_ready) await LoadAllUsersAsync(); }
 
     private async void TabMySchedule_Enter(object? sender, EventArgs e)
-        => await LoadMyScheduleAsync();
+    { if (_ready) await LoadMyScheduleAsync(); }
 
     private async void TabMyDogs_Enter(object? sender, EventArgs e)
-        => await LoadMyDogsAsync();
+    { if (_ready) await LoadMyDogsAsync(); }
 
     private async void TabMyWalks_Enter(object? sender, EventArgs e)
-        => await LoadClientWalksAsync();
+    { if (_ready) await LoadClientWalksAsync(); }
 
     // ════════════════════════════════════════════════════════════════
     // ADMIN DATA LOADING
@@ -697,16 +722,16 @@ public partial class MainForm : Form
         };
         pnlRemaining.Controls.Add(lblRemaining);
 
+        // WalksLoaded fires inside _calClient.LoadAsync() which is already
+        // running under RunAsync's semaphore — no extra lock needed.
         _calClient.WalksLoaded += async (month, _) =>
         {
-            if (!await _dbLock.WaitAsync(0)) return;
             try
             {
                 var summary = await _walks.GetMonthlySummaryAsync(_clientId, month.Year, month.Month);
                 lblRemaining.Text = $"Remaining walks this month: {summary.Remaining} / {summary.MaxWalksPerMonth} ({summary.PlanDescription})";
             }
             catch { /* best-effort display */ }
-            finally { _dbLock.Release(); }
         };
 
         tabMyWalks.Controls.Add(_calClient);

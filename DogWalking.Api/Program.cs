@@ -2,36 +2,58 @@ using DogWalking.Api.Configuration;
 using DogWalking.Api.Validators;
 using DogWalking.Infrastructure.Extensions;
 using FluentValidation;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// ── Domain + Infrastructure services
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddServices();
-builder.Services.AddCaching();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-// ── JWT authentication
-builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddSingleton<JwtTokenService>();
+    // ── Serilog
+    builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
-// ── Validation
-builder.Services.AddValidatorsFromAssemblyContaining<TokenRequestValidator>();
+    // ── Domain + Infrastructure services
+    builder.Services.AddDatabase(builder.Configuration);
+    builder.Services.AddServices();
+    builder.Services.AddCaching();
 
-// ── Controllers + OpenAPI
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+    // ── JWT authentication
+    builder.Services.AddJwtAuthentication(builder.Configuration);
+    builder.Services.AddSingleton<JwtTokenService>();
 
-var app = builder.Build();
+    // ── Validation
+    builder.Services.AddValidatorsFromAssemblyContaining<TokenRequestValidator>();
 
-// ── Middleware pipeline
-if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
+    // ── Controllers + OpenAPI
+    builder.Services.AddControllers();
+    builder.Services.AddOpenApi();
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+    var app = builder.Build();
 
-// ── Database initialization
-await app.Services.InitializeDatabaseAsync();
+    // ── Middleware pipeline
+    app.UseSerilogRequestLogging();
 
-app.Run();
+    if (app.Environment.IsDevelopment())
+        app.MapOpenApi();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    // ── Database initialization
+    await app.Services.InitializeDatabaseAsync();
+
+    Log.Information("API started");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "API terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
