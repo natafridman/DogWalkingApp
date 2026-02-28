@@ -4,10 +4,6 @@ using DogWalking.Domain.Interfaces;
 
 namespace DogWalking.Domain.Services;
 
-/// <summary>
-/// Factory Pattern: centralises creation of walk limit strategies.
-/// Callers request a strategy by subscription type without knowing concrete types.
-/// </summary>
 public static class WalkLimitStrategyFactory
 {
     /// <summary>Returns the appropriate walk limit strategy for the given subscription tier.</summary>

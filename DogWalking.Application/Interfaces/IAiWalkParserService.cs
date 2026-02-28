@@ -2,10 +2,6 @@ using DogWalking.Application.DTOs;
 
 namespace DogWalking.Application.Interfaces;
 
-/// <summary>
-/// Parses natural language walk requests using an AI model (e.g., ChatGPT).
-/// The implementation lives in Infrastructure to keep the Application layer free of external API details.
-/// </summary>
 public interface IAiWalkParserService
 {
     /// <summary>

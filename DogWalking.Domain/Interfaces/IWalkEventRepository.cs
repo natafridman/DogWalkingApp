@@ -12,10 +12,6 @@ public interface IWalkEventRepository
     Task<IEnumerable<WalkEvent>>  GetByWalkerIdAsync(int walkerId, CancellationToken ct = default);
     Task<IEnumerable<WalkEvent>>  GetByClientIdAsync(int clientId, CancellationToken ct = default);
 
-    /// <summary>
-    /// Returns all walks for ALL dogs belonging to a given client in a specific month.
-    /// Used by the Strategy Pattern to enforce monthly subscription limits.
-    /// </summary>
     Task<IEnumerable<WalkEvent>>  GetByClientAndMonthAsync(int clientId, int year, int month,
                                                            CancellationToken ct = default);
 

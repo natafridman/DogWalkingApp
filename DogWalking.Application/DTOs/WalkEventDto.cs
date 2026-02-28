@@ -40,8 +40,6 @@ public record WalkerResponseDto(int WalkEventId, int WalkerId, bool Accepted, st
 
 public record UpdateWalkStatusDto(int Id, WalkStatus NewStatus);
 
-public record AssignWalkerDto(int WalkEventId, int? WalkerId);
-
 /// <summary>Monthly summary of walk usage vs subscription limits.</summary>
 public record MonthlyWalkSummaryDto(int ActiveCount, int MaxWalksPerMonth, int Remaining, string PlanDescription);
 

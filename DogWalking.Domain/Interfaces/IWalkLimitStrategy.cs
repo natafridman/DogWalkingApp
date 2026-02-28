@@ -3,10 +3,6 @@ using DogWalking.Domain.Enums;
 
 namespace DogWalking.Domain.Interfaces;
 
-/// <summary>
-/// Strategy Pattern: defines the contract for subscription-based walk limit validation.
-/// Each subscription tier implements its own rule set.
-/// </summary>
 public interface IWalkLimitStrategy
 {
     SubscriptionType SubscriptionType { get; }

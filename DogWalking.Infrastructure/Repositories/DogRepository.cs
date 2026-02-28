@@ -5,11 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure.Repositories;
 
-/// <summary>
-/// EF Core implementation of IDogRepository.
-/// Eager-loads Client on reads; GetByIdWithWalksAsync also loads WalkEvents
-/// so the service layer can check for conflicts before scheduling.
-/// </summary>
 public class DogRepository : IDogRepository
 {
     private readonly DogWalkingDbContext _ctx;

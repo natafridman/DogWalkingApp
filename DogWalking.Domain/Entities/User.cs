@@ -48,6 +48,4 @@ public class User
         Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
         Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
     }
-
-    public void Deactivate() => IsActive = false;
 }

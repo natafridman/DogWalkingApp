@@ -6,10 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure.Repositories;
 
-/// <summary>
-/// EF Core implementation of IUserRepository.
-/// Read-only queries use AsNoTracking for performance.
-/// </summary>
 public class UserRepository : IUserRepository
 {
     private readonly DogWalkingDbContext _ctx;

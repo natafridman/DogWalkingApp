@@ -70,12 +70,6 @@ public partial class WalkEventService
         return MapToDto(walk);
     }
 
-    public async Task<IEnumerable<WalkEventDto>> GetByDogIdAsync(int dogId, CancellationToken ct = default)
-    {
-        var walks = await _uow.WalkEvents.GetByDogIdAsync(dogId, ct);
-        return walks.Select(x => MapToDto(x));
-    }
-
     public async Task<IEnumerable<WalkEventDto>> GetByClientIdAsync(int clientId, CancellationToken ct = default)
     {
         var walks = await _uow.WalkEvents.GetByClientIdAsync(clientId, ct);

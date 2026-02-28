@@ -91,20 +91,4 @@ public class WalkEventEntityTests
         Assert.Throws<DomainException>(() => w.TransitionTo(WalkStatus.InProgress));
     }
 
-    [Fact]
-    public void AssignWalker_SetsWalkerId()
-    {
-        var w = Valid();
-        w.AssignWalker(42);
-        Assert.Equal(42, w.WalkerId);
-    }
-
-    [Fact]
-    public void UnassignWalker_ClearsWalkerId()
-    {
-        var w = Valid();
-        w.AssignWalker(42);
-        w.UnassignWalker();
-        Assert.Null(w.WalkerId);
-    }
 }

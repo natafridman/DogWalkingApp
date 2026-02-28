@@ -121,12 +121,7 @@ public class WalkEvent
             _declines.Add(new WalkDecline(walkerId));
     }
 
-    public void UpdateNotes(string? notes)     => Notes    = notes;
-    public void UpdateLocation(string location) => Location = string.IsNullOrWhiteSpace(location) ? Location : location.Trim();
-
-    // Legacy helpers kept for compatibility with AssignWalkerAsync
-    public void AssignWalker(int walkerId) => WalkerId = walkerId;
-    public void UnassignWalker()           => WalkerId = null;
+    public void UpdateNotes(string? notes) => Notes = notes;
 
     private void SetWalkDate(DateTime date)
     {

@@ -7,10 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DogWalking.Application.Services;
 
-/// <summary>
-/// Orchestrates client use cases. No business rules here — those live in the domain.
-/// Depends on IUnitOfWork abstraction, never on EF Core directly.
-/// </summary>
 public class ClientService : IClientService
 {
     private readonly IUnitOfWork _uow;

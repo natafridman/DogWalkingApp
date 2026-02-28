@@ -11,7 +11,6 @@ public interface IUnitOfWork : IDisposable
     IDogRepository Dogs { get; }
     IWalkEventRepository WalkEvents { get; }
     IWalkerAvailabilityRepository WalkerAvailabilities { get; }
-    IWalkerWorkingAreaRepository  WalkerWorkingAreas   { get; }
 
     Task<int> CommitAsync(CancellationToken ct = default);
 }

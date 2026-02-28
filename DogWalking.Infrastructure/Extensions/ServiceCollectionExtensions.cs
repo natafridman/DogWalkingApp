@@ -15,10 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DogWalking.Infrastructure.Extensions;
 
-/// <summary>
-/// Focused extension methods that each register a single concern.
-/// Each method reads its own configuration section — callers just pass IConfiguration.
-/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
@@ -104,15 +100,10 @@ public static class ServiceCollectionExtensions
 
         // Seed default admin
         await auth.CreateUserAsync(new CreateUserDto(
-            "admin", "admin123", "System Administrator", UserRole.Admin));
-
-        // Seed a default client for demo
-        await auth.RegisterClientUserAsync(new RegisterClientUserDto(
-            "nata", "natafridman", "Nataniel Fridman",
-            "+1234567890", "nata@test.com", SubscriptionType.Basic, "123 Demo Street", "natafridman"));
+            "admin", "Admin123!", "System Administrator", UserRole.Admin));
 
         // Seed a default walker for demo
         await auth.CreateUserAsync(new CreateUserDto(
-            "nataw", "natafridman", "Nataniel Fridman Walker", UserRole.Walker));
+            "walker1", "Walker123!", "Demo Walker", UserRole.Walker));
     }
 }

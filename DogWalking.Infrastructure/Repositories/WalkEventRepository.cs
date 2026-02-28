@@ -6,10 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DogWalking.Infrastructure.Repositories;
 
-/// <summary>
-/// EF Core implementation of IWalkEventRepository.
-/// Supports server-side pagination and text search for the admin dashboard.
-/// </summary>
 public class WalkEventRepository : IWalkEventRepository
 {
     private readonly DogWalkingDbContext _ctx;

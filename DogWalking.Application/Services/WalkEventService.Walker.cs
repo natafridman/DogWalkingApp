@@ -84,12 +84,6 @@ public partial class WalkEventService
         return walks.Select(x => MapToDto(x));
     }
 
-    public async Task<IEnumerable<WalkEventDto>> GetProposedForWalkerAsync(int walkerId, CancellationToken ct = default)
-    {
-        var walks = await _uow.WalkEvents.GetByWalkerIdAsync(walkerId, ct);
-        return walks.Where(w => w.Status == WalkStatus.Proposed).Select(x => MapToDto(x));
-    }
-
     public async Task<IEnumerable<WalkEventDto>> GetMatchingRequestsForWalkerAsync(
         int walkerId, CancellationToken ct = default)
     {

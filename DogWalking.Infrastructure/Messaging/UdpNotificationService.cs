@@ -7,13 +7,6 @@ using DogWalking.Application.Interfaces;
 
 namespace DogWalking.Infrastructure.Messaging;
 
-/// <summary>
-/// LAN notification service using UDP multicast.
-/// All app instances on the same network automatically receive broadcasts.
-/// Uses a long-lived sender UdpClient to avoid socket allocation per publish.
-/// Swap this implementation for cloud messaging (Azure Service Bus, RabbitMQ, etc.)
-/// by registering a different INotificationService in DI.
-/// </summary>
 public class UdpNotificationService : INotificationService
 {
     private UdpClient? _listener;

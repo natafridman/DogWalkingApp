@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DogWalking.Application.Services;
 
-/// <summary>Admin operations: propose, assign, status transitions, delete, paged queries.</summary>
 public partial class WalkEventService
 {
     public async Task<WalkEventDto> ProposeToWalkerAsync(ProposeWalkDto dto, CancellationToken ct = default)
@@ -19,29 +18,6 @@ public partial class WalkEventService
             throw new InvalidOperationException($"User '{walker.Username}' is not a Walker.");
 
         walk.ProposeToWalker(dto.WalkerId, dto.EstimatedArrival);
-        _uow.WalkEvents.Update(walk);
-        await _uow.CommitAsync(ct);
-        return MapToDto(walk);
-    }
-
-    public async Task<WalkEventDto> AssignWalkerAsync(AssignWalkerDto dto, CancellationToken ct = default)
-    {
-        var walk = await _uow.WalkEvents.GetByIdAsync(dto.WalkEventId, ct)
-            ?? throw new KeyNotFoundException($"Walk event {dto.WalkEventId} not found.");
-
-        if (dto.WalkerId.HasValue)
-        {
-            var walker = await _uow.Users.GetByIdAsync(dto.WalkerId.Value, ct)
-                ?? throw new KeyNotFoundException($"Walker {dto.WalkerId} not found.");
-            if (walker.Role != UserRole.Walker)
-                throw new InvalidOperationException($"User '{walker.Username}' is not a Walker.");
-            walk.AssignWalker(dto.WalkerId.Value);
-        }
-        else
-        {
-            walk.UnassignWalker();
-        }
-
         _uow.WalkEvents.Update(walk);
         await _uow.CommitAsync(ct);
         return MapToDto(walk);

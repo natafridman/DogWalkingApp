@@ -8,12 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DogWalking.Application.Services;
 
-/// <summary>
-/// Orchestrates walk event use cases.
-/// Uses the Strategy Pattern (via WalkLimitStrategyFactory) to enforce
-/// subscription rules without coupling this service to specific tier logic.
-/// Split into partial classes by role: Admin, Walker, Client.
-/// </summary>
 public partial class WalkEventService : IWalkEventService
 {
     private readonly IUnitOfWork _uow;
@@ -29,20 +23,6 @@ public partial class WalkEventService : IWalkEventService
         _log = log;
         _walkValidator = walkValidator;
         _notifier = notifier;
-    }
-
-    // ── General Queries ─────────────────────────────────────
-
-    public async Task<IEnumerable<WalkEventDto>> GetByStatusAsync(WalkStatus status, CancellationToken ct = default)
-    {
-        var walks = await _uow.WalkEvents.GetByStatusAsync(status, ct);
-        return walks.Select(x => MapToDto(x));
-    }
-
-    public async Task<IEnumerable<WalkEventDto>> GetByDateRangeAsync(DateTime from, DateTime to, CancellationToken ct = default)
-    {
-        var walks = await _uow.WalkEvents.GetByDateRangeAsync(from, to, ct);
-        return walks.Select(x => MapToDto(x));
     }
 
     // ── Helpers ──────────────────────────────────────────────

@@ -7,12 +7,6 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DogWalking.Infrastructure;
 
-/// <summary>
-/// Unit of Work Pattern implementation.
-/// All repositories share the same DbContext instance,
-/// ensuring they participate in the same transaction.
-/// IMemoryCache is injected for repositories that benefit from caching.
-/// </summary>
 public class UnitOfWork : IUnitOfWork
 {
     private readonly DogWalkingDbContext _ctx;
@@ -22,7 +16,6 @@ public class UnitOfWork : IUnitOfWork
     public IDogRepository Dogs { get; }
     public IWalkEventRepository WalkEvents { get; }
     public IWalkerAvailabilityRepository WalkerAvailabilities { get; }
-    public IWalkerWorkingAreaRepository WalkerWorkingAreas { get; }
 
     public UnitOfWork(DogWalkingDbContext ctx, IMemoryCache cache)
     {
@@ -32,7 +25,6 @@ public class UnitOfWork : IUnitOfWork
         Dogs = new DogRepository(ctx);
         WalkEvents = new WalkEventRepository(ctx);
         WalkerAvailabilities = new WalkerAvailabilityRepository(ctx, cache);
-        WalkerWorkingAreas = new WalkerWorkingAreaRepository(ctx);
     }
 
     public async Task<int> CommitAsync(CancellationToken ct = default)

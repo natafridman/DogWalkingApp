@@ -6,11 +6,6 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DogWalking.Infrastructure.Repositories;
 
-/// <summary>
-/// Repository Pattern implementation for Client.
-/// AsNoTracking on read-only queries → better EF Core performance.
-/// IMemoryCache for subscription/profile lookups that rarely change.
-/// </summary>
 public class ClientRepository : IClientRepository
 {
     private readonly DogWalkingDbContext _ctx;
@@ -75,12 +70,6 @@ public class ClientRepository : IClientRepository
     public void Update(Client client)
     {
         _ctx.Clients.Update(client);
-        _cache.Remove(CacheKey(client.Id));
-    }
-
-    public void Remove(Client client)
-    {
-        _ctx.Clients.Remove(client);
         _cache.Remove(CacheKey(client.Id));
     }
 }
