@@ -178,6 +178,10 @@ In a larger system I wouldn't throw as many exceptions. Exceptions are expensive
 
 If this were a production system I would consider: replacing SHA-256 with bcrypt/Argon2, adding CQRS with read projections for the admin dashboard, swapping UDP for RabbitMQ or Azure Service Bus, moving to Redis for distributed caching, adding monthly reports, replacing zone-based matching with GPS coordinates, exposing services as a REST API for a mobile companion app, adding an audit log for state transitions, and rate limiting for web-exposed scenarios.
 
+I would also add a rating system for walkers and clients. Clients could rate their walker after each walk, and that score would be visible when choosing a preferred walker, so the client can decide based on what other people say about that walker. Right now the decision of accepting a walk is entirely on the walker and they have to figure out the logistics on their own. I would integrate maps with suggested routes near parks and quiet zones, showing estimated pickup and dropoff times for each house, so walkers can plan their day better before accepting.
+
+Another thing I would add is a dog profile with more detail: temperament (friendly, aggressive, shy), whether it's neutered, sex or size. This matters because a walker needs to know what they're getting into before accepting, especially if they're walking multiple dogs at once. Two aggressive unneutered males together is a bad idea, and right now the walker has no way to know that from the app.
+
 ## Tech Stack
 
 | Layer | Technology |
