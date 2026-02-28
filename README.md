@@ -63,6 +63,8 @@ I made this decision because business rules change at a different pace than the 
 
 Entities are rich, not anemic. `WalkEvent` has a state machine that validates transitions, `Dog` prevents overlapping walks, `Client` tracks subscription and zone. I decided to put the rules on the entities themselves because invariants belong where the data lives. If transition logic lived in a service, someone could forget to validate. With `TransitionTo()` and `ProposeToWalker()` on the entity, the rules are impossible to bypass.
 
+If I had gone with anemic entities, the alternative would be domain services: a `WalkEventDomainService` that receives the entity as a parameter and runs the validations before mutating it. The entity would be a plain data container (just properties, no logic), and every service that needs to change status would have to call the domain service first. The problem is that nothing forces you to go through that service, so a new developer (or even myself in a hurry) could just set `walk.Status = WalkStatus.Completed` directly and skip all the guards. With rich entities, the setter is private and the only way to change state is through the method that validates.
+
 ### Strategy Pattern for Subscription Limits
 
 Each subscription tier has its own `IWalkLimitStrategy` implementation, created by `WalkLimitStrategyFactory`. I thought about a simple if/else chain, but subscription tiers will grow. With the Strategy Pattern, adding a new tier is one class plus one line in the factory. Each strategy encapsulates max walks per month, daily limits, and a description all in one place.
@@ -123,6 +125,8 @@ The admin's Walk Events tab uses server-side pagination with `Skip/Take`. An act
 
 Serilog with two sinks: console and rolling file (logs/ folder, one file per day, keeps the last 7). I chose Serilog because the built-in provider has no file sink. EF Core internals are filtered to Warning so the output stays clean. Configuration lives in appsettings.json so I can change log levels without recompiling.
 
+To improve performance I would also use logging instrumentation (OpenTelemetry) instead of writing log strings everywhere. Instrumentation emits structured traces and metrics with minimal overhead, and lets you correlate requests across services without manually adding context to each log call. For a larger system I would stream those logs into Snowflake. File-based logging doesn't scale when you need to query months of audit data across services, and Snowflake handles that with standard SQL without impacting the main database.
+
 ### Docker Support
 
 The API has a Dockerfile and the solution root has a docker-compose.yml that runs SQL Server 2022 and the API. The connection string is overridden via environment variable. Multi-stage Dockerfile keeps the final image small.
@@ -160,13 +164,15 @@ I chose SQLite in-memory because it gives me real EF Core behavior without requi
 
 ## AI Walk Request Feature
 
-Clients can request walks using natural language (e.g., "walk Rocky tomorrow at 3pm in Palermo for 45 minutes"). The text goes to OpenAI which extracts structured fields. I added a confirmation step because AI parsing is probabilistic, the user verifies the extracted data before submitting. I chose OpenAI over local NLP because a regex parser would break on natural phrasing variations.
+Clients can request walks using natural language (e.g., "walk Rocky tomorrow at 3pm in Palermo for 45 minutes"). The text goes to OpenAI which extracts structured fields. I added a confirmation step because AI parsing is probabilistic, the user verifies the extracted data before submitting.
 
 ## Error Handling
 
 Domain exceptions carry meaningful messages, not stack traces. `UnitOfWork.CommitAsync()` wraps EF's concurrency exceptions into domain-friendly ones. UI forms wrap all async calls in try/catch. Notifications are best-effort so network failures never block walk operations. FluentValidation surfaces clean error messages.
 
 I considered a global error handler, but WinForms async void handlers don't propagate to a central handler. The `RunAsync()` helper in MainForm wraps the common pattern (semaphore + try/catch + error display) so individual handlers stay clean.
+
+In a larger system I wouldn't throw as many exceptions. Exceptions are expensive in terms of performance, so I would only keep the ones that need to bubble up to trigger a retry or a rollback. For validation and expected failures I would use a Result pattern instead, returning success/failure without the overhead of throwing.
 
 ## Future Improvements
 
