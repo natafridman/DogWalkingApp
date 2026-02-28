@@ -3,7 +3,6 @@ using FluentValidation;
 
 namespace DogWalking.Application.Validators;
 
-/// <summary>Validates client creation: name, phone format, email format, address.</summary>
 public sealed class CreateClientDtoValidator : AbstractValidator<CreateClientDto>
 {
     public CreateClientDtoValidator()

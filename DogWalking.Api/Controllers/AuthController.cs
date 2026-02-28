@@ -10,11 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DogWalking.Api.Controllers;
 
-/// <summary>
-/// OAuth2-style authentication controller.
-/// Provides a token endpoint (RFC 6749 §4.3 — Resource Owner Password Credentials)
-/// and a protected endpoint that returns the authenticated user's claims.
-/// </summary>
 [ApiController]
 [Route("api/auth")]
 public sealed class AuthController : ControllerBase

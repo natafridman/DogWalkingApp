@@ -51,11 +51,7 @@ public partial class WalkEventService : IWalkEventService
         dog?.Client?.Address ?? w.Dog?.Client?.Address ?? string.Empty
     );
 
-    /// <summary>
-    /// Expands a base date into all occurrence dates for the given recurrence pattern.
-    /// All arithmetic is done in local time so weekday boundaries are correct.
-    /// Dates are returned as UTC.
-    /// </summary>
+    /// <summary>Generates all dates for the recurrence pattern within the current month.</summary>
     private static IEnumerable<DateTime> GenerateRecurrenceDates(DateTime baseDate, RecurrenceType recurrence)
     {
         if (recurrence == RecurrenceType.OneTime)

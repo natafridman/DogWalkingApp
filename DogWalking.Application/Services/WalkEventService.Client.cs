@@ -50,8 +50,10 @@ public partial class WalkEventService
 
         await _uow.WalkEvents.AddRangeAsync(walkEvents, ct);
         await _uow.CommitAsync(ct);
+
         _log.LogInformation("Walk event(s) scheduled for dog {DogId} on {Date}",
             dto.DogId, dto.WalkDate);
+
         return MapToDto(walkEvents[0], dog);
     }
 

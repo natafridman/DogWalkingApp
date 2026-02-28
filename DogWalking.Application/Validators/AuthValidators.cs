@@ -3,7 +3,6 @@ using FluentValidation;
 
 namespace DogWalking.Application.Validators;
 
-/// <summary>Ensures username and password are not empty at login.</summary>
 public sealed class LoginDtoValidator : AbstractValidator<LoginDto>
 {
     public LoginDtoValidator()
@@ -13,7 +12,6 @@ public sealed class LoginDtoValidator : AbstractValidator<LoginDto>
     }
 }
 
-/// <summary>Validates admin-created user accounts (username, name, password length).</summary>
 public sealed class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
 {
     public CreateUserDtoValidator()
@@ -26,7 +24,6 @@ public sealed class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
     }
 }
 
-/// <summary>Validates self-registration: password match, phone/email format, address required.</summary>
 public sealed class RegisterClientUserDtoValidator : AbstractValidator<RegisterClientUserDto>
 {
     public RegisterClientUserDtoValidator()

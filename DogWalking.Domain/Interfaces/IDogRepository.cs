@@ -2,10 +2,6 @@ using DogWalking.Domain.Entities;
 
 namespace DogWalking.Domain.Interfaces;
 
-/// <summary>
-/// Persistence contract for the Dog entity.
-/// GetByIdWithWalksAsync eagerly loads walk events — needed for overlap validation.
-/// </summary>
 public interface IDogRepository
 {
     Task<Dog?> GetByIdAsync(int id, CancellationToken ct = default);
@@ -14,6 +10,6 @@ public interface IDogRepository
     void Update(Dog dog);
     void Remove(Dog dog);
 
-    /// <summary>Loads the dog with its walk events for conflict checking before scheduling.</summary>
+    /// <summary>Includes walk events (needed for overlap validation).</summary>
     Task<Dog?> GetByIdWithWalksAsync(int id, CancellationToken ct = default);
 }

@@ -10,13 +10,6 @@ public interface IWalkLimitStrategy
     bool AllowsMultiplePerDay { get; }
     string Description { get; }
 
-    /// <summary>
-    /// Validates whether a new walk can be scheduled under this subscription.
-    /// Throws <see cref="Exceptions.DomainException"/> if the limit is exceeded.
-    /// </summary>
-    /// <param name="existingWalksThisMonth">
-    /// All non-cancelled walks for the client in the proposed walk's month.
-    /// </param>
-    /// <param name="proposedDate">The UTC date/time of the new walk.</param>
+    /// <summary>Throws DomainException if the subscription limit is exceeded.</summary>
     void ValidateWalkAllowed(IEnumerable<WalkEvent> existingWalksThisMonth, DateTime proposedDate);
 }

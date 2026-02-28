@@ -9,12 +9,6 @@ using App = System.Windows.Forms.Application;
 
 namespace DogWalking.WinForms;
 
-/// <summary>
-/// Application entry point. Loads configuration from appsettings.json,
-/// sets up the DI container, applies migrations, starts the LAN notification
-/// listener, and launches the login form.
-/// Main must be synchronous to preserve STA thread affinity required by OLE controls.
-/// </summary>
 static class Program
 {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;

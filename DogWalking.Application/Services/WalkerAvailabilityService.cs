@@ -7,10 +7,7 @@ using DogWalking.Domain.Services;
 
 namespace DogWalking.Application.Services;
 
-/// <summary>
-/// Manages walker availability windows (each slot carries its own zone).
-/// Also exposes the walk-matching algorithm to the presentation layer.
-/// </summary>
+/// <summary>Manages walker availability and walk matching.</summary>
 public class WalkerAvailabilityService : IWalkerAvailabilityService
 {
     private readonly IUnitOfWork _uow;

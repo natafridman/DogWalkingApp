@@ -2,7 +2,6 @@ using DogWalking.Domain.Enums;
 
 namespace DogWalking.Application.DTOs;
 
-/// <summary>Read model for clients — includes computed DogCount for admin grid display.</summary>
 public record ClientDto(
     int Id,
     string Name,
@@ -15,7 +14,6 @@ public record ClientDto(
     string Address = ""
 );
 
-/// <summary>Input model for creating a new client (admin or registration flow).</summary>
 public record CreateClientDto(
     string Name,
     string PhoneNumber,

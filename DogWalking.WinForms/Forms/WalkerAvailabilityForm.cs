@@ -4,10 +4,7 @@ using DogWalking.Domain.Enums;
 
 namespace DogWalking.WinForms.Forms;
 
-/// <summary>
-/// Allows a walker to manage their weekly availability windows.
-/// Each slot carries its own geographic zone.
-/// </summary>
+/// <summary>Walker availability management form.</summary>
 public partial class WalkerAvailabilityForm : Form
 {
     private readonly IWalkerAvailabilityService _svc;

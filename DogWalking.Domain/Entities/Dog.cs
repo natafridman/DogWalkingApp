@@ -67,9 +67,7 @@ public class Dog
         BirthDate = birthDate;
     }
 
-    /// <summary>
-    /// Business rule: a dog cannot have two overlapping scheduled/in-progress walks.
-    /// </summary>
+    /// <summary>Checks that no active walk overlaps the proposed time slot.</summary>
     public void ValidateNoConflictingWalk(DateTime proposedDate, int durationMinutes)
     {
         var proposedEnd = proposedDate.AddMinutes(durationMinutes);

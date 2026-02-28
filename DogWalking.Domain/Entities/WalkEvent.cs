@@ -4,9 +4,7 @@ using DogWalking.Domain.Exceptions;
 namespace DogWalking.Domain.Entities;
 
 /// <summary>
-/// Represents a dog walking event from request through completion.
-/// Enforces valid status transitions following the full lifecycle:
-///   Requested → Proposed → Accepted → InProgress → Completed
+/// Walk event with status lifecycle: Requested → Proposed → Accepted → InProgress → Completed.
 /// </summary>
 public class WalkEvent
 {
@@ -47,11 +45,6 @@ public class WalkEvent
         SetDuration(durationMinutes);
     }
 
-    /// <summary>
-    /// Enforces valid status transitions.
-    /// Use the semantic helpers (ProposeToWalker, AcceptByWalker, DeclineByWalker)
-    /// for transitions that carry additional data.
-    /// </summary>
     public void TransitionTo(WalkStatus newStatus)
     {
         bool isValid = (Status, newStatus) switch
@@ -75,10 +68,6 @@ public class WalkEvent
         Status = newStatus;
     }
 
-    /// <summary>
-    /// Proposes this walk to a specific walker (admin/matching system action).
-    /// Sets the walker, estimated arrival time, and transitions to Proposed.
-    /// </summary>
     public void ProposeToWalker(int walkerId, DateTime? estimatedArrival = null)
     {
         TransitionTo(WalkStatus.Proposed);
@@ -86,13 +75,8 @@ public class WalkEvent
         EstimatedArrivalTime = estimatedArrival;
     }
 
-    /// <summary>Walker accepts the proposal — transitions to Accepted.</summary>
     public void AcceptByWalker()  => TransitionTo(WalkStatus.Accepted);
 
-    /// <summary>
-    /// Walker releases an already-accepted walk — clears the assignment
-    /// and returns the walk to Requested so another walker can claim it.
-    /// </summary>
     public void UnacceptByWalker(string? note = null)
     {
         TransitionTo(WalkStatus.Requested);
@@ -102,12 +86,6 @@ public class WalkEvent
             Notes = note;
     }
 
-    /// <summary>
-    /// Walker declines the walk. If the walk was Proposed to this walker,
-    /// it transitions back to Requested. If it was already Requested (open request),
-    /// the status stays unchanged. In both cases the walker is recorded as having
-    /// declined so the walk no longer appears in their schedule.
-    /// </summary>
     public void DeclineByWalker(int walkerId)
     {
         if (Status == WalkStatus.Proposed)

@@ -9,10 +9,7 @@ using FluentValidation;
 
 namespace DogWalking.Application.Services;
 
-/// <summary>
-/// Handles authentication. Passwords hashed with SHA-256 (demo).
-/// Production should use BCrypt / Argon2.
-/// </summary>
+/// <summary>Login, registration, and password hashing (SHA-256 for demo).</summary>
 public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _uow;

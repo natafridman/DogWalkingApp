@@ -1,6 +1,5 @@
 namespace DogWalking.Application.DTOs;
 
-/// <summary>Read model for dogs — AgeInYears is computed from BirthDate.</summary>
 public record DogDto(
     int      Id,
     int      ClientId,

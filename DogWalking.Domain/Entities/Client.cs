@@ -14,13 +14,8 @@ public class Client
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    /// <summary>Neighbourhood/zone used to match this client with eligible walkers.</summary>
     public string Zone { get; private set; } = string.Empty;
-
-    /// <summary>Physical street address.</summary>
     public string Address { get; private set; } = string.Empty;
-
-    /// <summary>Optional link to the User account for this client (role = Client).</summary>
     public int? UserId { get; private set; }
 
     private readonly List<Dog> _dogs = new();
@@ -44,9 +39,7 @@ public class Client
         CreatedAt = DateTime.UtcNow;
     }
 
-    /// <summary>
-    /// Business rule: a client with active or scheduled walks cannot be deactivated.
-    /// </summary>
+    /// <summary>Throws if the client has active walks.</summary>
     public void Deactivate()
     {
         bool hasActiveWalks = _dogs
@@ -70,10 +63,6 @@ public class Client
         Zone = zone.Trim();
     }
 
-    /// <summary>
-    /// Changes the subscription plan for this client.
-    /// Downgrading is allowed but does not retroactively cancel existing walks.
-    /// </summary>
     public void ChangeSubscription(SubscriptionType newSubscription)
     {
         Subscription = newSubscription;
