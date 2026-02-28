@@ -1,264 +1,191 @@
 # Dog Walking Manager
 
-A desktop application for managing a dog walking business. Clients register their dogs and request walks; walkers see matching requests on a calendar and accept them; admins oversee everything.
-
-Built with **WinForms (.NET 8)** and **Entity Framework Core** on **SQL Server LocalDB**.
-
----
+A desktop application for managing a dog walking business. Clients register their dogs and request walks, walkers see matching requests on a calendar and accept them, admins oversee everything. Built with WinForms (.NET 10) and Entity Framework Core on SQL Server LocalDB.
 
 ## What Does It Do?
 
-Imagine you run a dog walking company. You have **clients** (dog owners), **walkers** (your employees), and an **admin** who manages the operation.
+Clients sign up, register their dogs, pick a subscription plan, and request walks. They can optionally choose a preferred walker, schedule recurring walks, or request walks via natural language through an AI assistant.
 
-- **Clients** sign up, register their dogs, pick a subscription plan, and request walks.
-- **Walkers** set their availability (days, hours, zones). The system matches open walk requests to available walkers automatically. Walkers accept or decline from a monthly calendar.
-- **Admins** manage clients, dogs, walkers, users, and walk events from a tabbed dashboard.
+Walkers set their availability (days, hours, zones). The system matches open requests to available walkers automatically. Walkers accept or decline from a monthly calendar.
 
-Each walk goes through a clear lifecycle: **Requested → Proposed → Accepted → In Progress → Completed** (or Cancelled at any point). Subscription plans (Free, Basic, Premium) limit how many walks a client can book per month.
+Admins manage clients, dogs, walkers, users, and walk events from a tabbed dashboard. They can create walks for any client regardless of subscription limits.
 
-When a walker accepts a walk, the client gets a real-time notification over the local network via UDP multicast (can be changed in the future to a message broker for production).
-
----
+Each walk follows a lifecycle: Requested, Proposed, Accepted, InProgress, Completed (or Cancelled at any point). Subscription plans (Free, Basic, Pro, Premium) limit how many walks a client can book per month. When a walker accepts a walk, the client gets a real-time notification over the local network via UDP multicast.
 
 ## How to Run
 
-### Prerequisites
-
-| Tool | Version |
-|------|---------|
-| .NET SDK | 8.0+ |
-| SQL Server LocalDB | Included with Visual Studio |
-| Visual Studio / Rider | 2022+ recommended |
-
-### Setup
+You need .NET SDK 10.0+, SQL Server LocalDB (included with Visual Studio), and Visual Studio 2022+ is recommended.
 
 ```bash
-# 1. Clone the repo
 git clone <repo-url>
 cd DogWalkingApp
-
-# 2. Restore packages
 dotnet restore
-
-# 3. Apply EF Core migrations (creates the database)
 dotnet ef database update --project DogWalking.Infrastructure --startup-project DogWalking.Infrastructure
-
-# 4. Run the app
 dotnet run --project DogWalking.WinForms
-
-# 5. Run all tests (60 unit + 40 integration)
 dotnet test
 ```
 
-### Default Accounts
-
-| Username | Password | Role |
-|----------|----------|------|
-| `admin` | `Admin123!` | Admin |
-| `walker1` | `Walker123!` | Walker |
-
-New walker and client accounts can be created from the login screen's registration panel.
-
----
+Default accounts: `admin` / `Admin123!` (Admin role), `walker1` / `Walker123!` (Walker role). New walker and client accounts can be created from the login screen's registration panel.
 
 ## Project Structure
 
 ```
 DogWalkingApp/
 ├── DogWalking.Domain/           # Entities, enums, interfaces, business rules
-│   ├── Entities/                # Client, Dog, User, WalkEvent, WalkerAvailability...
-│   ├── Enums/                   # WalkStatus, SubscriptionType, RecurrenceType...
-│   ├── Interfaces/              # Repository contracts (IClientRepository, etc.)
-│   ├── Services/                # Walk limit strategies (domain logic)
-│   ├── ValueObjects/            # PhoneNumber value object
-│   └── Exceptions/              # DomainException, ConcurrencyException
-│
 ├── DogWalking.Application/      # Use cases, DTOs, validators, service interfaces
-│   ├── Services/                # AuthService, ClientService, WalkEventService...
-│   ├── DTOs/                    # Data transfer objects (no EF dependencies)
-│   ├── Interfaces/              # Service contracts (IWalkEventService, etc.)
-│   └── Validators/              # FluentValidation rules
-│
 ├── DogWalking.Infrastructure/   # EF Core, repositories, DB config, messaging
-│   ├── Data/                    # DbContext + entity configurations
-│   ├── Repositories/            # Repository implementations
-│   ├── Messaging/               # UDP multicast notification service
-│   └── Extensions/              # DI registration (ServiceCollectionExtensions)
-│
 ├── DogWalking.WinForms/         # UI layer (forms, controls, DI setup)
-│   ├── Forms/                   # LoginForm, MainForm, DogDialog, WalkEventForm...
-│   ├── Controls/                # WalkCalendarPanel, ToastNotification
-│   └── Program.cs               # Entry point + DI container setup
-│
 ├── DogWalking.Tests/            # Unit tests (xUnit + Moq)
-│   ├── Domain/                  # Entity logic, value objects, strategies
-│   └── Services/                # Service-layer tests with mocked repos
-│
 └── DogWalking.IntegrationTests/ # Integration tests (SQLite in-memory)
-    └── Services/                # Full-stack tests: service → repo → DB
 ```
-
----
 
 ## Architecture
 
-The solution follows **Clean Architecture** with four layers. Dependencies only point inward: UI → Application → Domain. Infrastructure implements Domain interfaces.
+I chose Clean Architecture with four layers. Dependencies only point inward: UI, Application, Domain, Infrastructure.
 
 ```
 ┌──────────────────────────────────┐
-│          WinForms (UI)           │  Thin forms, no business logic
+│          WinForms (UI)           │
 ├──────────────────────────────────┤
-│    Application (Use Cases)       │  Services, DTOs, validation
+│    Application (Use Cases)       │
 ├──────────────────────────────────┤
-│     Domain (Business Rules)      │  Entities, enums, interfaces
+│     Domain (Business Rules)      │
 ├──────────────────────────────────┤
-│   Infrastructure (Persistence)   │  EF Core, repositories, messaging
+│   Infrastructure (Persistence)   │
 └──────────────────────────────────┘
 ```
 
-**Why this structure?**
-
-- Business logic lives in **Domain entities** (e.g., `WalkEvent.TransitionTo()` enforces valid status changes). Forms never decide business rules.
-- The **Application layer** coordinates use cases without knowing how data is stored. It depends on repository *interfaces*, not EF Core.
-- **Infrastructure** provides the implementations: EF Core repositories, database configurations, the notification service.
-- The **WinForms layer** only handles user interaction: displaying data, capturing input, calling service methods.
-
-This means you can swap the database, change the UI framework, or replace the notification mechanism without touching business logic.
-
----
+I made this decision because business rules change at a different pace than the UI or storage. By isolating the domain at the center, I can swap the database, the UI framework, or the notification mechanism without touching walk lifecycle rules or subscription logic. Repository interfaces live in Domain, implementations in Infrastructure, so Application never knows about EF Core. This also makes everything testable with mocked repositories.
 
 ## Design Decisions
 
-### Domain-Driven Design
+### Rich Domain Model (DDD)
 
-Entities are **rich**, not anemic. `WalkEvent` has a state machine that validates transitions (`Requested → Proposed → Accepted → ...`). `Dog.ValidateNoConflictingWalk()` prevents overlapping walks. `Client` tracks subscription and zone. All invariants are enforced at the domain level.
+Entities are rich, not anemic. `WalkEvent` has a state machine that validates transitions, `Dog` prevents overlapping walks, `Client` tracks subscription and zone. I decided to put the rules on the entities themselves because invariants belong where the data lives. If transition logic lived in a service, someone could forget to validate. With `TransitionTo()` and `ProposeToWalker()` on the entity, the rules are impossible to bypass.
 
-### Design Patterns Used
+### Strategy Pattern for Subscription Limits
 
-| Pattern | Where | Why |
-|---------|-------|-----|
-| **Repository** | `IClientRepository`, `IDogRepository`, etc. | Decouples domain from EF Core. Application depends on abstractions. |
-| **Unit of Work** | `UnitOfWork` class | All repositories share one `DbContext` instance → single transaction boundary. |
-| **Strategy** | `WalkLimitStrategyFactory` + per-tier strategies | Each subscription tier (Free/Basic/Premium) has its own walk limit rules. Adding a new tier means adding one class, no `if/else` chains. |
-| **Factory** | `WalkLimitStrategyFactory.Create()` | Encapsulates strategy selection. The caller doesn't know which concrete strategy it gets. |
-| **Dependency Injection** | `ServiceCollectionExtensions`, `Program.cs` | All services are registered in the DI container. Forms and services receive their dependencies through constructors. |
-| **Singleton** | `INotificationService` (UDP multicast) | One socket listener per application instance, shared across all scopes. |
+Each subscription tier has its own `IWalkLimitStrategy` implementation, created by `WalkLimitStrategyFactory`. I thought about a simple if/else chain, but subscription tiers will grow. With the Strategy Pattern, adding a new tier is one class plus one line in the factory. Each strategy encapsulates max walks per month, daily limits, and a description all in one place.
 
-### Entity Framework Core
+### Walk Lifecycle State Machine
 
-- **Code First** with Fluent API configurations (one per entity in `Data/Configurations/`).
-- **Async everywhere** — all repository methods are async. UI never blocks.
-- **AsNoTracking** on read-only queries for better performance.
-- **Optimistic concurrency** via `RowVersion` on `WalkEvent` — prevents lost updates when two users modify the same walk.
-- **Composite indexes** on `(DogId, WalkDate, Status)` and `(Status, WalkDate)` for the most frequent query patterns.
-- **Migrations** managed with `dotnet ef migrations`.
+```
+Requested → Proposed → Accepted → InProgress → Completed
+```
 
-### Validation
+Any state can transition to Cancelled. Rejected loops back to Requested so the walk re-enters the pool for another walker. The domain records each decline in a `WalkDecline` entity so the same walker won't see it again. I implemented this directly in the entity because invalid transitions corrupt data, and I wanted it to be impossible for the UI to skip a step.
 
-Two layers of validation:
+### Partial Classes for WalkEventService
 
-1. **FluentValidation** at the Application layer — checks input format, required fields, date ranges before touching the database.
-2. **Domain validation** in entities — enforces business invariants (no overlapping walks, valid status transitions, subscription limits).
+`WalkEventService` is split into four files: `.cs` (constructor, helpers), `.Admin.cs`, `.Walker.cs`, `.Client.cs`. I considered separate service classes, but they all share the same `IUnitOfWork`, logger, and validator. Partial classes give me organizational separation without duplicating constructors or complicating DI.
 
-Validation errors surface to the UI through exception messages displayed in labels (no raw stack traces).
+### Modular DI Registration
 
-### Error Handling
+Infrastructure services register through focused methods: `AddDatabase()`, `AddServices()`, `AddCaching()`, `AddNotifications()`, `AddAI()`. Originally I had one big method, but I split it because not every host needs everything. The API doesn't need notifications, the test harness only needs database and services.
 
-- **Domain exceptions** (`DomainException`, `ConcurrencyException`) carry meaningful messages for the user.
-- Services catch EF `DbUpdateConcurrencyException` in `UnitOfWork.CommitAsync()` and wrap it in a domain-friendly `ConcurrencyException`.
-- UI forms wrap all async calls in try/catch, showing errors in labels or message boxes.
-- The notification system is **best-effort** — a network failure never blocks a walk operation.
+### STA Thread and Synchronous Main
+
+`Program.Main()` is synchronous (`void Main`, not `async Task Main`). I originally had it async, but I ran into `ThreadStateException` with ComboBox autocomplete. WinForms requires STA for OLE controls, and after an await, continuations can resume on an MTA thread. Synchronous main guarantees everything initializes on the STA thread.
+
+### DbContext Concurrency Protection
+
+All DB operations in `MainForm` are serialized through a `SemaphoreSlim(1,1)` plus a `_ready` flag. This was a problem that took me a while. EF Core's DbContext is not thread-safe, and in WinForms, tab Enter events fire during `TabPages.AddRange()` and again when the form gains focus, creating overlapping async handlers on the same context. The semaphore alone wasn't enough because the events fire before the session is initialized. The `_ready` flag ignores those spurious events, and the real load happens once when the form gets focus. I also cancel the `CancellationTokenSource` on logout so in-flight operations from the previous session don't collide with the new one.
+
+### Preferred Walker Selection
+
+Clients can optionally choose a specific walker from a dropdown. I made it optional because most clients just want someone available. When a preferred walker is chosen, the walk skips Requested and goes directly to Proposed for that walker, reusing the existing propose/accept workflow.
+
+### Recurring Walks
+
+Clients can schedule walks with four patterns: one-time, all working days, every two working days, or same day of the week. I thought about lazy expansion like Google Calendar, but I generate all instances upfront because each walk needs its own status tracking and cancellation capability. Individual entities make each walk independent.
+
+### Repository + Unit of Work
+
+All repositories share a single DbContext through UnitOfWork. This gives me one transaction boundary across multiple repositories. When scheduling a recurring walk, the service reads dogs, checks clients, queries events, and inserts new ones, all in one `CommitAsync()`. If anything fails, nothing persists.
+
+### Two-Layer Validation
+
+FluentValidation at the Application layer catches malformed input early with user-friendly messages. Domain validation in entities enforces business invariants that need data context, like "this dog already has a walk at that time." Separating them keeps each layer focused on what it does best.
+
+### Real-Time Notifications via UDP Multicast
+
+When a walker accepts a walk, a UDP multicast message goes out on the local network. I chose this because it's zero-infrastructure for a LAN desktop app, no broker to install. The `INotificationService` interface is abstract enough to swap for RabbitMQ later.
 
 ### Caching
 
-`IMemoryCache` is used at the repository level for data that changes infrequently:
+`IMemoryCache` at the repository level for data that changes infrequently: client profiles and walker availability slots, both with 5 minute TTL. Cache-aside pattern with explicit invalidation on writes.
 
-- **Client profiles** (subscription lookups) — 5 min TTL, invalidated on write.
-- **Walker availability slots** — 5 min TTL, invalidated on write.
+### Server-Side Pagination
 
-This follows the **cache-aside** pattern: check cache first, fall back to database, store result. Write operations explicitly evict the cache entry to prevent stale data.
+The admin's Walk Events tab uses server-side pagination with `Skip/Take`. An active business could have thousands of events, so loading them all would be slow. `PagedResultDto<T>` keeps memory usage constant.
 
-### Real-Time Notifications
+### Logging
 
-Walkers accepting a walk triggers a UDP multicast message on the local network. All app instances subscribed to the multicast group receive it. Clients see a toast notification when their walk gets accepted.
+Serilog with two sinks: console and rolling file (logs/ folder, one file per day, keeps the last 7). I chose Serilog because the built-in provider has no file sink. EF Core internals are filtered to Warning so the output stays clean. Configuration lives in appsettings.json so I can change log levels without recompiling.
 
-This is a lightweight solution for LAN environments. For production at scale, it would be replaced with a message broker (RabbitMQ, Azure Service Bus).
+### Docker Support
 
-### Pagination
+The API has a Dockerfile and the solution root has a docker-compose.yml that runs SQL Server 2022 and the API. The connection string is overridden via environment variable. Multi-stage Dockerfile keeps the final image small.
 
-The admin Walk Events tab uses **server-side pagination** (10 items per page). The repository uses `Skip/Take` with `CountAsync` to avoid loading all rows. A `PagedResultDto<T>` carries items, total count, and page metadata.
+```bash
+docker-compose up --build
+docker-compose down
+```
 
----
+## Design Patterns
 
-## Testing Strategy
+| Pattern | Where | Why |
+|---------|-------|-----|
+| Repository | `IClientRepository`, `IDogRepository`, etc. | Decouples domain from EF Core |
+| Unit of Work | `UnitOfWork` class | Single transaction boundary across repositories |
+| Strategy | `WalkLimitStrategyFactory` + per-tier strategies | New tiers = new class, zero changes to existing code |
+| Factory | `WalkLimitStrategyFactory.Create()` | Encapsulates strategy selection |
+| State Machine | `WalkEvent.TransitionTo()` | Enforces valid transitions at the domain level |
+| Partial Classes | `WalkEventService.{Admin,Walker,Client}.cs` | Organizational separation by role |
+| Dependency Injection | `ServiceCollectionExtensions`, `Program.cs` | Constructor injection everywhere |
+| Singleton | `INotificationService` (UDP multicast) | One socket listener per app instance |
+| Cache-Aside | `IMemoryCache` at repository level | Check cache, fallback to DB, invalidate on writes |
 
-**100 tests total**: 60 unit + 40 integration.
+## Testing
 
-### Unit Tests (`DogWalking.Tests`)
+100 tests total: 60 unit + 40 integration.
 
-- **Entity tests**: status transitions, validation rules, edge cases (e.g., transitioning to an invalid status throws `DomainException`).
-- **Value object tests**: `PhoneNumber` parsing, equality, edge cases.
-- **Strategy tests**: walk limits per subscription tier, daily limits, boundary cases.
-- **Service tests (mocked)**: Moq-based tests verifying service orchestration without hitting a database.
+Unit tests cover entity state transitions, value objects, subscription strategies, and service orchestration with mocked repositories using Moq.
 
-### Integration Tests (`DogWalking.IntegrationTests`)
+Integration tests use SQLite in-memory so each test gets a fresh database in microseconds, no SQL Server required. They cover full round-trips (service, repository, database) for all six services: Auth, Client, Dog, User, WalkEvent, WalkerAvailability.
 
-- **SQLite in-memory** database — each test gets a fresh database, no cleanup needed.
-- Full service → repository → database round-trips.
-- Cover all six services: Auth, Client, Dog, User, WalkEvent, WalkerAvailability.
-- Test real EF Core behavior: relationships, cascades, concurrency.
+What's tested: valid and invalid state transitions, subscription limit enforcement, recurring walk scheduling, walk claiming/declining/unaccepting workflow, preferred walker flow, authentication, CRUD with validation, concurrency conflicts, admin subscription bypass.
 
-### What's tested
+I chose SQLite in-memory because it gives me real EF Core behavior without requiring a SQL Server instance, and there's no shared state between tests.
 
-- Valid and invalid status transitions
-- Subscription limit enforcement (walks per month, walks per day)
-- Walk scheduling with recurrence
-- Walk claiming/declining workflow
-- Authentication (login, registration, duplicate username detection)
-- CRUD operations with validation
-- Concurrency conflict handling
+## AI Walk Request Feature
 
----
+Clients can request walks using natural language (e.g., "walk Rocky tomorrow at 3pm in Palermo for 45 minutes"). The text goes to OpenAI which extracts structured fields. I added a confirmation step because AI parsing is probabilistic, the user verifies the extracted data before submitting. I chose OpenAI over local NLP because a regex parser would break on natural phrasing variations.
 
-## AI Usage
+## Error Handling
 
-AI was used as a development aid, not a replacement:
+Domain exceptions carry meaningful messages, not stack traces. `UnitOfWork.CommitAsync()` wraps EF's concurrency exceptions into domain-friendly ones. UI forms wrap all async calls in try/catch. Notifications are best-effort so network failures never block walk operations. FluentValidation surfaces clean error messages.
 
-- **UI layout**: Assisted with WinForms control positioning and Designer code (repetitive boilerplate).
-- **Test generation**: Helped scaffold test structures, which were then reviewed and adjusted to cover the right edge cases.
-- **Code comments**: Assisted with XML documentation on interfaces and complex methods.
-
-All AI output was reviewed, tested, and adapted to fit the project's architecture. The domain model, business rules, architecture decisions, and overall design are my own.
-
----
+I considered a global error handler, but WinForms async void handlers don't propagate to a central handler. The `RunAsync()` helper in MainForm wraps the common pattern (semaphore + try/catch + error display) so individual handlers stay clean.
 
 ## Future Improvements
 
-If this were a production system with more time, I would consider:
-
-- **Authentication**: Replace SHA-256 hashing with bcrypt/Argon2 and add token-based session management.
-- **CQRS**: Separate read models from write models. The admin dashboard could use optimized read projections (e.g., denormalized views for walk listings) while writes go through the domain model.
-- **Message broker**: Replace UDP multicast with RabbitMQ or Azure Service Bus for reliable cross-network messaging, delivery guarantees, and message persistence.
-- **Distributed caching**: Move from in-process `IMemoryCache` to Redis for multi-instance deployments.
-- **Reporting**: Monthly/weekly reports for clients and walkers (walks completed, revenue, walker performance).
-- **Geolocation**: Replace zone-based matching with GPS coordinates and radius-based availability.
-- **Mobile client**: Expose services as a REST API; build a companion mobile app for walkers on the go.
-- **Audit log**: Track who changed what and when, especially for walk status transitions and cancellations.
-- **Rate limiting / throttling**: Protect against abuse in a web-exposed scenario.
-
----
+If this were a production system I would consider: replacing SHA-256 with bcrypt/Argon2, adding CQRS with read projections for the admin dashboard, swapping UDP for RabbitMQ or Azure Service Bus, moving to Redis for distributed caching, adding monthly reports, replacing zone-based matching with GPS coordinates, exposing services as a REST API for a mobile companion app, adding an audit log for state transitions, and rate limiting for web-exposed scenarios.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Language | C# 12 / .NET 8 |
+| Language | C# 13 / .NET 10 |
 | UI | Windows Forms |
-| ORM | Entity Framework Core 8 |
+| ORM | Entity Framework Core 10 |
 | Database | SQL Server LocalDB |
 | Validation | FluentValidation |
+| Logging | Serilog (Console + File sinks) |
 | Testing | xUnit, Moq |
 | Integration Tests | SQLite in-memory |
 | DI Container | Microsoft.Extensions.DependencyInjection |
 | Caching | Microsoft.Extensions.Caching.Memory |
 | Notifications | UDP Multicast (System.Net.Sockets) |
+| AI | OpenAI API |
+| Containerization | Docker + docker-compose |
