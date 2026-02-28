@@ -17,7 +17,7 @@ Each walk follows a lifecycle: Requested, Proposed, Accepted, InProgress, Comple
 You need .NET SDK 10.0+, SQL Server LocalDB (included with Visual Studio), and Visual Studio 2022+ is recommended.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/natafridman/DogWalkingApp.git
 cd DogWalkingApp
 dotnet restore
 dotnet ef database update --project DogWalking.Infrastructure --startup-project DogWalking.Infrastructure
