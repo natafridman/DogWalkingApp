@@ -188,6 +188,10 @@ I would also add a rating system for walkers and clients. Clients could rate the
 
 Another thing I would add is a dog profile with more detail: temperament (friendly, aggressive, shy), whether it's neutered, sex or size. This matters because a walker needs to know what they're getting into before accepting, especially if they're walking multiple dogs at once. Two aggressive unneutered males together is a bad idea, and right now the walker has no way to know that from the app.
 
+The UI could also be improved by building custom WinForms controls with a more modern look, consistent colors, rounded buttons, better spacing. Right now it works but it's standard WinForms style. With more time I would create a small design system with reusable styled controls so the whole app feels more polished.
+
+I would also add a payment system tied to the subscription selection. Right now the client picks a plan and that's it. In a real scenario, choosing Premium should trigger a payment flow (Stripe, MercadoPago, etc.) and the subscription should only activate after the payment is confirmed.
+
 ## Tech Stack
 
 | Layer | Technology |
