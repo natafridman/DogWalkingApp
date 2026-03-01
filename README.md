@@ -57,6 +57,8 @@ I chose Clean Architecture with four layers. Dependencies only point inward: UI,
 
 I made this decision because business rules change at a different pace than the UI or storage. By isolating the domain at the center, I can swap the database, the UI framework, or the notification mechanism without touching walk lifecycle rules or subscription logic. Repository interfaces live in Domain, implementations in Infrastructure, so Application never knows about EF Core. This also makes everything testable with mocked repositories.
 
+I didn't use MVC or MVVM because neither fits well here. MVC is designed around HTTP request/response cycles, it makes sense for web apps but not for a stateful desktop application where forms stay alive and interact directly with services. MVVM works well with WPF because of its built-in data binding engine, but WinForms doesn't have that. I would have ended up writing a lot of manual property-changed plumbing just to follow the pattern, adding complexity without real benefit. Clean Architecture already gives me the separation I need: forms handle UI, services handle logic, and the domain owns the rules.
+
 ## Design Decisions
 
 ### Rich Domain Model (DDD)
